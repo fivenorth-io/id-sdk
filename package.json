@@ -1,0 +1,30 @@
+{
+	"name": "@fivenorth/id-sdk",
+	"version": "0.1.0",
+	"author": "support@fivenorth.io",
+	"main": "dist/index.js",
+	"module": "dist/index.js",
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"files": [
+		"dist"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": "github:fivenorth-io/id-sdk",
+	"scripts": {
+		"build": "bun build ./src/index.ts --outdir ./dist",
+		"prepublishOnly": "bun run build",
+		"generate-types": "openapi-typescript ../kyc-backend/api-openapi.json -o src/generated-types.ts"
+	},
+	"type": "module",
+	"types": "dist/index.d.ts",
+	"dependencies": {
+		"openapi-typescript": "^7.0.0"
+	}
+}
