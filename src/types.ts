@@ -1,12 +1,12 @@
 /**
  * Network type
  */
-export type Network = 'devnet' | 'testnet' | 'mainnet' | 'dev' | 'test' | 'main';
+export type Network = 'devnet' | 'mainnet' | 'dev' | 'main';
 
 /**
  * Credential provider types
  */
-export type CredentialProvider = 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER' | 'SUMSUB';
+export type CredentialProvider = 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
 
 /**
  * KYC Status

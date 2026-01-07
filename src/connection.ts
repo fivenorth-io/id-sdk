@@ -82,9 +82,6 @@ export class Connection {
             case 'devnet':
             case 'dev':
                 return BASE_URLS.devnet;
-            case 'testnet':
-            case 'test':
-                return BASE_URLS.testnet;
             case 'mainnet':
             case 'main':
                 return BASE_URLS.mainnet;
@@ -95,15 +92,13 @@ export class Connection {
 
     /**
      * Resolve token endpoint URL based on network
+     * Both networks use the same authorization server with different realms
      */
     private resolveTokenEndpoint(network: Network): string {
         switch (network) {
             case 'devnet':
             case 'dev':
                 return TOKEN_ENDPOINTS.devnet;
-            case 'testnet':
-            case 'test':
-                return TOKEN_ENDPOINTS.testnet;
             case 'mainnet':
             case 'main':
                 return TOKEN_ENDPOINTS.mainnet;

@@ -50,29 +50,13 @@ const devConnection = await idSdk.connect({
   network: 'devnet',
 });
 
-// Connect to testnet
-const testConnection = await idSdk.connect({
-  clientId: 'your-client-id',
-  clientSecret: 'your-client-secret',
-  network: 'testnet',
-});
-
-// Override URLs if needed (advanced)
-const customConnection = await idSdk.connect({
-  clientId: 'your-client-id',
-  clientSecret: 'your-client-secret',
-  network: 'mainnet',
-  baseUrl: 'https://custom-api.example.com/api/v1',
-  tokenEndpoint: 'https://custom-auth.example.com/token',
-});
 ```
 
 ### Network Configuration
 
-The SDK supports three networks:
+The SDK supports two networks:
 - `mainnet` (default) - Production environment
 - `devnet` - Development environment
-- `testnet` - Test environment
 
 URLs are automatically resolved based on the network. You can override them if needed, but it's recommended to use the network parameter.
 
@@ -199,12 +183,12 @@ The connection instance returned from `idSdk.connect()`. All API operations are 
 
 #### Network
 ```typescript
-type Network = 'devnet' | 'testnet' | 'mainnet' | 'dev' | 'test' | 'main';
+type Network = 'devnet' | 'mainnet' | 'dev' | 'main';
 ```
 
 #### CredentialProvider
 ```typescript
-type CredentialProvider = 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER' | 'SUMSUB';
+type CredentialProvider = 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
 ```
 
 #### Credential

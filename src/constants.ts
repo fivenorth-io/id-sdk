@@ -22,17 +22,16 @@ export const DEFAULT_NETWORK = 'mainnet';
  */
 export const BASE_URLS = {
     devnet: 'https://id.devnet.cantonloop.com/api/v1',
-    testnet: 'https://id.testnet.cantonloop.com/api/v1',
     mainnet: 'https://id.cantonloop.com/api/v1',
 } as const;
 
 /**
  * Token endpoint URLs by network
+ * Both networks use the same authorization server with different realms
  */
 export const TOKEN_ENDPOINTS = {
     devnet: 'https://auth.console-dev.fivenorth.io/realms/5n-apps/protocol/openid-connect/token',
-    testnet: 'https://auth.console-test.fivenorth.io/realms/5n-apps/protocol/openid-connect/token',
-    mainnet: 'https://auth.console.fivenorth.io/realms/5n-apps/protocol/openid-connect/token',
+    mainnet: 'https://auth.console-dev.fivenorth.io/realms/5n-apps-mainnet/protocol/openid-connect/token',
 } as const;
 
 /**
