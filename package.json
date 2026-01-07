@@ -1,7 +1,23 @@
 {
 	"name": "@fivenorth/id-sdk",
 	"version": "0.1.0",
+	"description": "TypeScript/JavaScript SDK for programmatically interacting with the 5N ID service",
+	"keywords": [
+		"5n",
+		"id",
+		"sdk",
+		"credentials",
+		"verification",
+		"identity",
+		"canton",
+		"fivenorth"
+	],
 	"author": "support@fivenorth.io",
+	"license": "UNLICENSED",
+	"homepage": "https://github.com/fivenorth-io/id-sdk#readme",
+	"bugs": {
+		"url": "https://github.com/fivenorth-io/id-sdk/issues"
+	},
 	"main": "dist/index.js",
 	"module": "dist/index.js",
 	"devDependencies": {
