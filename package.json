@@ -5,7 +5,9 @@
 	"main": "dist/index.js",
 	"module": "dist/index.js",
 	"devDependencies": {
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"@types/node": "^20.0.0",
+		"tsx": "^4.7.0"
 	},
 	"peerDependencies": {
 		"typescript": "^5"
@@ -20,7 +22,9 @@
 	"scripts": {
 		"build": "bun build ./src/index.ts --outdir ./dist",
 		"prepublishOnly": "bun run build",
-		"generate-types": "openapi-typescript ../kyc-backend/api-openapi.json -o src/generated-types.ts"
+		"generate-types": "openapi-typescript ../kyc-backend/api-openapi.json -o src/generated-types.ts",
+		"test": "tsx test.ts",
+		"test:bun": "bun run test.ts"
 	},
 	"type": "module",
 	"types": "dist/index.d.ts",

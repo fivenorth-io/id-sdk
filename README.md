@@ -175,7 +175,7 @@ console.log(status.credentialData); // Original credential metadata
 
 ### IDSdk
 
-The main SDK class exported as `idSdk`.
+The main SDK class. The class name is `IDSdk` and it's exported as an instance `idSdk`.
 
 #### Methods
 

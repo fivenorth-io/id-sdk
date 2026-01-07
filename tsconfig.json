@@ -6,6 +6,9 @@
             "DOM",
             "DOM.Iterable"
         ],
+        "types": [
+            "node"
+        ],
         "target": "ESNext",
         "module": "Preserve",
         "moduleDetection": "force",
@@ -32,6 +35,7 @@
         "noPropertyAccessFromIndexSignature": false
     },
     "include": [
-        "src"
+        "src",
+        "test.ts"
     ]
 }
