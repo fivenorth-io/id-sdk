@@ -10,7 +10,7 @@ export const API_VERSION = 'v1';
 /**
  * SDK Version
  */
-export const SDK_VERSION = '0.1.0';
+export const SDK_VERSION = '0.1.1';
 
 /**
  * Default Network
