@@ -1,6 +1,6 @@
 {
 	"name": "@fivenorth/id-sdk",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "TypeScript/JavaScript SDK for programmatically interacting with the 5N ID service",
 	"keywords": [
 		"5n",
