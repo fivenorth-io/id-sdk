@@ -23,6 +23,7 @@
         "outDir": "./dist",
         "declaration": true,
         "declarationMap": true,
+        "rootDir": "./src",
         // Best practices
         "strict": true,
         "skipLibCheck": true,
@@ -35,7 +36,11 @@
         "noPropertyAccessFromIndexSignature": false
     },
     "include": [
-        "src",
-        "test.ts"
+        "src/**/*"
+    ],
+    "exclude": [
+        "test.ts",
+        "node_modules",
+        "dist"
     ]
 }
