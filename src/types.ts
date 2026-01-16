@@ -177,3 +177,72 @@ export interface GetCredentialsOptions {
     offset?: number;
     limit?: number;
 }
+
+/**
+ * Badge level
+ */
+export type BadgeLevel = 'bronze' | 'silver' | 'gold' | 'platinum';
+
+/**
+ * Confidence level
+ */
+export type ConfidenceLevel = 'low' | 'medium-low' | 'medium' | 'medium-high' | 'high';
+
+/**
+ * Human score badge
+ */
+export interface HumanScoreBadge {
+    id: string;
+    name: string;
+    description: string;
+    level: BadgeLevel;
+    category: string;
+    icon?: string;
+}
+
+/**
+ * Social account metrics
+ */
+export interface SocialAccountMetrics {
+    provider: CredentialProvider;
+    ageInDays: number;
+    followersCount?: number;
+    followingCount?: number;
+    postsCount?: number;
+    verified?: boolean;
+    email?: string;
+    accountCreatedAt?: string;
+    githubRepos?: number;
+    githubFollowers?: number;
+    twitterDescription?: string;
+    githubBio?: string;
+    githubCompany?: string;
+    githubLocation?: string;
+    googleContactCount?: number;
+}
+
+/**
+ * Human score result
+ */
+export interface HumanScoreResult {
+    totalScore: number;
+    confidenceLevel: ConfidenceLevel;
+    breakdown: {
+        accountAgeScore: number;
+        socialMetricsScore: number;
+        emailConsistencyScore: number;
+        providerCountScore: number;
+    };
+    badges: HumanScoreBadge[];
+    details: {
+        accountAges: Array<{ provider: CredentialProvider; ageInDays: number }>;
+        socialMetrics: SocialAccountMetrics[];
+        emailConsistency: {
+            uniqueEmails: string[];
+            consistencyScore: number;
+        };
+        providerCount: number;
+        allUserInfo: Record<string, any>[];
+        allTokenClaims: Record<string, any>[];
+    };
+}

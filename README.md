@@ -155,6 +155,29 @@ console.log(status.isActive); // boolean
 console.log(status.credentialData); // Original credential metadata
 ```
 
+### Human Score
+
+#### Get Human Score
+
+Get the human score calculation for the authenticated user. The human score evaluates account authenticity based on account age, social metrics, email consistency, and provider count:
+
+```typescript
+const humanScore = await connection.getHumanScore();
+
+console.log(humanScore.totalScore); // Total score (0-100)
+console.log(humanScore.confidenceLevel); // 'low', 'medium-low', 'medium', 'medium-high', 'high'
+console.log(humanScore.breakdown); // Score breakdown by category
+console.log(humanScore.badges); // Array of earned badges
+console.log(humanScore.details); // Detailed metrics and information
+```
+
+The response includes:
+- **totalScore**: Overall score from 0-100
+- **confidenceLevel**: Confidence level based on the score
+- **breakdown**: Score breakdown by category (accountAgeScore, socialMetricsScore, emailConsistencyScore, providerCountScore)
+- **badges**: Array of earned badges with levels (bronze, silver, gold, platinum)
+- **details**: Detailed metrics including account ages, social metrics, email consistency, provider count, and raw user info
+
 ## API Reference
 
 ### IDSdk
@@ -178,6 +201,7 @@ The connection instance returned from `idSdk.connect()`. All API operations are 
 - `generateVerificationLink(request: GenerateVerificationLinkRequest): Promise<GenerateVerificationLinkResponse>` - Generate a verification link
 - `generateVerificationLinksBatch(request: BatchGenerateVerificationLinkRequest): Promise<BatchGenerateVerificationLinkResponse>` - Generate multiple verification links
 - `checkVerificationStatus(token: string): Promise<VerificationStatusResponse>` - Check verification status (public endpoint)
+- `getHumanScore(): Promise<HumanScoreResult>` - Get human score calculation for the authenticated user
 
 ### Types
 
@@ -220,6 +244,44 @@ interface VerificationStatusResponse {
   kycProvider: string | null;
   credentialData: CredentialMetadata | null;
 }
+```
+
+#### HumanScoreResult
+```typescript
+interface HumanScoreResult {
+  totalScore: number;
+  confidenceLevel: ConfidenceLevel;
+  breakdown: {
+    accountAgeScore: number;
+    socialMetricsScore: number;
+    emailConsistencyScore: number;
+    providerCountScore: number;
+  };
+  badges: HumanScoreBadge[];
+  details: {
+    accountAges: Array<{ provider: CredentialProvider; ageInDays: number }>;
+    socialMetrics: SocialAccountMetrics[];
+    emailConsistency: {
+      uniqueEmails: string[];
+      consistencyScore: number;
+    };
+    providerCount: number;
+    allUserInfo: Record<string, any>[];
+    allTokenClaims: Record<string, any>[];
+  };
+}
+
+interface HumanScoreBadge {
+  id: string;
+  name: string;
+  description: string;
+  level: BadgeLevel;
+  category: string;
+  icon?: string;
+}
+
+type BadgeLevel = 'bronze' | 'silver' | 'gold' | 'platinum';
+type ConfidenceLevel = 'low' | 'medium-low' | 'medium' | 'medium-high' | 'high';
 ```
 
 ## Error Handling

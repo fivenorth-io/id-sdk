@@ -10,6 +10,7 @@ import type {
     BatchGenerateVerificationLinkRequest,
     BatchGenerateVerificationLinkResponse,
     VerificationStatusResponse,
+    HumanScoreResult,
 } from './types';
 import { UnauthorizedError, APIError } from './errors';
 import {
@@ -350,5 +351,15 @@ export class Connection {
         }
 
         return response.json();
+    }
+
+    /**
+     * Get human score for the authenticated user
+     * @returns Human score result with breakdown, badges, and detailed metrics
+     */
+    async getHumanScore(): Promise<HumanScoreResult> {
+        return this.request<HumanScoreResult>(ENDPOINTS.HUMAN_SCORE, {
+            method: HTTP.METHODS.GET,
+        });
     }
 }
