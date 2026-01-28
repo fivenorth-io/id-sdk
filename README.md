@@ -159,10 +159,10 @@ console.log(status.credentialData); // Original credential metadata
 
 #### Get Human Score
 
-Get the human score calculation for the authenticated user. The human score evaluates account authenticity based on account age, social metrics, email consistency, and provider count:
+Get the human score calculation for a specific party. The human score evaluates account authenticity based on account age, social metrics, email consistency, and provider count:
 
 ```typescript
-const humanScore = await connection.getHumanScore();
+const humanScore = await connection.getHumanScore('party::identifier');
 
 console.log(humanScore.totalScore); // Total score (0-100)
 console.log(humanScore.confidenceLevel); // 'low', 'medium-low', 'medium', 'medium-high', 'high'
@@ -201,7 +201,7 @@ The connection instance returned from `idSdk.connect()`. All API operations are 
 - `generateVerificationLink(request: GenerateVerificationLinkRequest): Promise<GenerateVerificationLinkResponse>` - Generate a verification link
 - `generateVerificationLinksBatch(request: BatchGenerateVerificationLinkRequest): Promise<BatchGenerateVerificationLinkResponse>` - Generate multiple verification links
 - `checkVerificationStatus(token: string): Promise<VerificationStatusResponse>` - Check verification status (public endpoint)
-- `getHumanScore(): Promise<HumanScoreResult>` - Get human score calculation for the authenticated user
+- `getHumanScore(partyId: string): Promise<HumanScoreResult>` - Get human score calculation for a specific party
 
 ### Types
 

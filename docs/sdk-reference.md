@@ -166,15 +166,18 @@ if (status.verifiedAt) {
 }
 ```
 
-### `getHumanScore()`
+### `getHumanScore(partyId)`
 
-Gets the identity verification "human score" with detailed breakdown.
+Gets the identity verification "human score" with detailed breakdown for a specific party.
+
+**Parameters**:
+- `partyId` (string, required): The party ID to get the human score for
 
 **Returns**: `Promise<HumanScoreResponse>`
 
 **Example**:
 ```typescript
-const score = await connection.getHumanScore();
+const score = await connection.getHumanScore('party::identifier');
 
 console.log(`Total Score: ${score.totalScore}`);
 console.log('Badges:');

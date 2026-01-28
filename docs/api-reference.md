@@ -206,12 +206,15 @@ Check the verification status of a token. This is a public endpoint that does no
 
 ### Get Human Score
 
-Get the identity verification "human score" with detailed breakdown.
+Get the identity verification "human score" with detailed breakdown for a specific party.
 
-**Endpoint**: `GET /api/v1/kyc/human-score`
+**Endpoint**: `GET /api/v1/kyc/human-score/:partyId`
 
 **Headers**:
 - `Authorization: Bearer <token>`
+
+**Parameters**:
+- `partyId` (path parameter, required): The party ID to get the human score for
 
 **Response**:
 ```json

@@ -120,8 +120,8 @@ if (status.status === 'verified') {
 ### Get Human Score
 
 ```typescript
-// Get identity verification score
-const score = await connection.getHumanScore();
+// Get identity verification score for a specific party
+const score = await connection.getHumanScore('party::identifier');
 
 console.log(`Total Score: ${score.totalScore}/100`);
 
@@ -184,7 +184,7 @@ async function verifyPartyIdentity(partyId: string) {
   console.log(`Share this link with the user to verify their identity`);
 
   // 5. Get human score
-  const score = await connection.getHumanScore();
+  const score = await connection.getHumanScore(partyId);
   console.log(`\nCurrent human score: ${score.totalScore}/100`);
 
   return {

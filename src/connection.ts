@@ -354,11 +354,14 @@ export class Connection {
     }
 
     /**
-     * Get human score for the authenticated user
+     * Get human score for a specific party
+     * @param partyId - The party ID to get the human score for
      * @returns Human score result with breakdown, badges, and detailed metrics
      */
-    async getHumanScore(): Promise<HumanScoreResult> {
-        return this.request<HumanScoreResult>(ENDPOINTS.HUMAN_SCORE, {
+    async getHumanScore(partyId: string): Promise<HumanScoreResult> {
+        const endpoint = `${ENDPOINTS.HUMAN_SCORE}/${encodeURIComponent(partyId)}`;
+
+        return this.request<HumanScoreResult>(endpoint, {
             method: HTTP.METHODS.GET,
         });
     }

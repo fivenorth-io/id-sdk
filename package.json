@@ -43,7 +43,7 @@
 		"build": "bun build ./src/index.ts --outdir ./dist && tsc --emitDeclarationOnly",
 		"prepublishOnly": "bun run build",
 		"generate-types": "openapi-typescript ../kyc-backend/api-openapi.json -o src/generated-types.ts",
-		"test": "tsx test.ts",
+		"test": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx test.ts",
 		"test:bun": "bun run test.ts"
 	},
 	"type": "module",
