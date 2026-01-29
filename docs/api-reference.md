@@ -276,7 +276,7 @@ GET /api/v1/kyc/resolve?partyId=party::04a5835d6cc470817989e9acc1f20c0a::12200d3
       "username": "johndoe",
       "firstName": "John",
       "lastName": "Doe",
-      "kycProvider": "SUMSUB",
+      "kycProvider": "GOOGLE",
       "contractId": "008064f25bcfa1dff5129a3e5cbf68553cf48400dda996bfd58b5c21c5bca454ecca11122025436ea2b81f3558afe832a943f9b92a864104cc8d53f3f9fc6ae4e48b119e7a",
       "metadata": {
         "email": "user@example.com",

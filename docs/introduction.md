@@ -49,7 +49,6 @@ The SDK (`@fivenorth/id-sdk`) provides a simpler, type-safe interface that:
 
 - **Identity Verification**: Verify the identity of parties in your Canton applications
 - **Credential Management**: Request, store, and manage identity credentials
-- **KYC Integration**: Integrate Know Your Customer (KYC) verification into your workflows
 - **Audit Trails**: Maintain tamper-proof audit trails of identity verification activities
 - **Multi-Party Applications**: Manage identities across multiple parties in distributed applications
 

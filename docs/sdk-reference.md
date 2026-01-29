@@ -357,7 +357,7 @@ The connection object returned by `idSdk.connect()`.
     username?: string;
     firstName?: string;
     lastName?: string;
-    kycProvider: 'SUMSUB' | 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
+    kycProvider: 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
     contractId: string;
     metadata?: Record<string, any>;
   }>;

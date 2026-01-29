@@ -174,14 +174,14 @@ console.log(result.credentials); // Array of resolved credentials
 result.credentials.forEach(cred => {
   console.log(cred.partyId); // User's party ID
   console.log(cred.email); // Email from metadata
-  console.log(cred.kycProvider); // KYC provider (SUMSUB, GOOGLE, etc.)
+  console.log(cred.kycProvider); // Provider (GOOGLE, LINKEDIN, etc.)
   console.log(cred.contractId); // Contract ID on the ledger
 });
 ```
 
 #### Reverse Lookup: Resolve by Party ID
 
-Find all credentials when you have a user's party ID. This returns all credentials across all KYC providers for that user:
+Find all credentials when you have a user's party ID. This returns all credentials for that user:
 
 ```typescript
 const partyId = 'party::04a5835d6cc470817989e9acc1f20c0a::12200d35764b9b490251e499af00626b54516c4f3f1c021c2eb72bf7c72f38662cb0';
@@ -191,7 +191,7 @@ console.log(result.credentials); // All credentials for this party
 result.credentials.forEach(cred => {
   console.log(cred.email); // Email from metadata
   console.log(cred.username); // Username from metadata
-  console.log(cred.kycProvider); // KYC provider
+  console.log(cred.kycProvider); // Provider
 });
 ```
 
@@ -318,7 +318,7 @@ interface ResolvedCredential {
   username?: string;
   firstName?: string;
   lastName?: string;
-  kycProvider: 'SUMSUB' | 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
+  kycProvider: 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
   contractId: string;
   metadata?: Record<string, any>;
 }
@@ -421,7 +421,7 @@ If you want to generate types from the OpenAPI specification:
 bun run generate-types
 ```
 
-This will generate types from `../kyc-backend/api-openapi.json` into `src/generated-types.ts`.
+This will generate types from the OpenAPI specification into `src/generated-types.ts`.
 
 ## License
 
