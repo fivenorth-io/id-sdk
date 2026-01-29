@@ -238,6 +238,61 @@ Get the identity verification "human score" with detailed breakdown for a specif
 }
 ```
 
+### Resolve Credentials
+
+Resolve credentials using forward lookup (by email/username) or reverse lookup (by party ID). This endpoint supports two lookup methods:
+
+**Forward Lookup**: Search by email or username to find associated credentials and party ID. Use when you have a user's identifier.
+
+**Reverse Lookup**: Search by party ID to find all associated credentials and metadata. Use when you have a user's party ID from the ledger.
+
+**Endpoint**: `GET /api/v1/kyc/resolve`
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Query Parameters** (exactly one required):
+- `q` (string, optional): Email or username for forward lookup
+- `partyId` (string, optional): Party ID for reverse lookup
+
+**Forward Lookup Example**:
+```bash
+GET /api/v1/kyc/resolve?q=user@example.com
+```
+
+**Reverse Lookup Example**:
+```bash
+GET /api/v1/kyc/resolve?partyId=party::04a5835d6cc470817989e9acc1f20c0a::12200d35764b9b490251e499af00626b54516c4f3f1c021c2eb72bf7c72f38662cb0
+```
+
+**Response**:
+```json
+{
+  "credentials": [
+    {
+      "partyId": "party::04a5835d6cc470817989e9acc1f20c0a::12200d35764b9b490251e499af00626b54516c4f3f1c021c2eb72bf7c72f38662cb0",
+      "userId": 123,
+      "email": "user@example.com",
+      "username": "johndoe",
+      "firstName": "John",
+      "lastName": "Doe",
+      "kycProvider": "SUMSUB",
+      "contractId": "008064f25bcfa1dff5129a3e5cbf68553cf48400dda996bfd58b5c21c5bca454ecca11122025436ea2b81f3558afe832a943f9b92a864104cc8d53f3f9fc6ae4e48b119e7a",
+      "metadata": {
+        "email": "user@example.com",
+        "firstName": "John",
+        "lastName": "Doe"
+      }
+    }
+  ]
+}
+```
+
+**Error Responses**:
+- `400 Bad Request`: Either `q` or `partyId` must be provided, but not both
+- `401 Unauthorized`: Invalid or expired access token
+- `403 Forbidden`: Institution role required
+
 ## Error Responses
 
 All endpoints may return error responses in the following format:

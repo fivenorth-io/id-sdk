@@ -187,6 +187,75 @@ score.badges.forEach(badge => {
 console.log('Breakdown:', score.breakdown);
 ```
 
+### `resolve(query)`
+
+**Forward Lookup**: Resolves credentials by email or username. Use this when you have a user's identifier (email/username) and need to find their associated credentials and party ID.
+
+**Parameters**:
+- `query` (string, required): The email address or username to search for. The search is case-insensitive.
+
+**Returns**: `Promise<ResolveCredentialsResponse>`
+
+**Example**:
+```typescript
+// Find credentials by email
+const result = await connection.resolve('user@example.com');
+console.log(`Found ${result.credentials.length} credential(s)`);
+result.credentials.forEach(cred => {
+  console.log(`Party ID: ${cred.partyId}`);
+  console.log(`Provider: ${cred.kycProvider}`);
+  console.log(`Contract ID: ${cred.contractId}`);
+});
+
+// Find credentials by username
+const result2 = await connection.resolve('johndoe');
+```
+
+### `reverseResolve(partyId)`
+
+**Reverse Lookup**: Resolves all credentials associated with a specific party ID. Use this when you have a user's party ID from the ledger and need to retrieve their credentials and user information.
+
+**Parameters**:
+- `partyId` (string, required): The party ID to resolve (e.g., "party::123")
+
+**Returns**: `Promise<ResolveCredentialsResponse>`
+
+**Example**:
+```typescript
+const result = await connection.reverseResolve('party::04a5835d6cc470817989e9acc1f20c0a::12200d35764b9b490251e499af00626b54516c4f3f1c021c2eb72bf7c72f38662cb0');
+
+console.log(`Found ${result.credentials.length} credential(s) for this party`);
+result.credentials.forEach(cred => {
+  console.log(`Email: ${cred.email}`);
+  console.log(`Username: ${cred.username}`);
+  console.log(`Provider: ${cred.kycProvider}`);
+  console.log(`Contract ID: ${cred.contractId}`);
+});
+```
+
+### `resolveCredentials(options)`
+
+Convenience method that automatically determines whether to use forward or reverse lookup based on the provided options. You can provide either `q` (email/username) for forward lookup or `partyId` for reverse lookup, but not both.
+
+**Parameters**:
+- `options` (object, required):
+  - `q` (string, optional): Email or username for forward lookup
+  - `partyId` (string, optional): Party ID for reverse lookup
+  - Exactly one of `q` or `partyId` must be provided
+
+**Returns**: `Promise<ResolveCredentialsResponse>`
+
+**Example**:
+```typescript
+// Forward lookup by email
+const result1 = await connection.resolveCredentials({ q: 'user@example.com' });
+
+// Reverse lookup by party ID
+const result2 = await connection.resolveCredentials({
+  partyId: 'party::123'
+});
+```
+
 ## Type Definitions
 
 ### `IdSdkConnection`
@@ -274,6 +343,24 @@ The connection object returned by `idSdk.connect()`.
     document?: number;
     biometric?: number;
   };
+}
+```
+
+### `ResolveCredentialsResponse`
+
+```typescript
+{
+  credentials: Array<{
+    partyId?: string;
+    userId: number;
+    email?: string;
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+    kycProvider: 'SUMSUB' | 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
+    contractId: string;
+    metadata?: Record<string, any>;
+  }>;
 }
 ```
 

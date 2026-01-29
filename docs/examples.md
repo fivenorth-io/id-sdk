@@ -143,6 +143,76 @@ if (score.breakdown.biometric) {
 }
 ```
 
+### Forward Lookup: Resolve Credentials by Email or Username
+
+```typescript
+// Find credentials when you have a user's email or username
+const result = await connection.resolve('user@example.com');
+
+if (result.credentials.length > 0) {
+  console.log(`Found ${result.credentials.length} credential(s):`);
+  result.credentials.forEach(cred => {
+    console.log(`\nParty ID: ${cred.partyId}`);
+    console.log(`Provider: ${cred.kycProvider}`);
+    console.log(`Email: ${cred.email}`);
+    console.log(`Username: ${cred.username}`);
+    console.log(`Contract ID: ${cred.contractId}`);
+  });
+} else {
+  console.log('No credentials found for this email/username');
+}
+
+// You can also search by username
+const result2 = await connection.resolve('johndoe');
+```
+
+### Reverse Lookup: Resolve Credentials by Party ID
+
+```typescript
+// Find all credentials when you have a user's party ID
+const partyId = 'party::04a5835d6cc470817989e9acc1f20c0a::12200d35764b9b490251e499af00626b54516c4f3f1c021c2eb72bf7c72f38662cb0';
+const result = await connection.reverseResolve(partyId);
+
+if (result.credentials.length > 0) {
+  console.log(`Found ${result.credentials.length} credential(s) for party ${partyId}:`);
+  result.credentials.forEach(cred => {
+    console.log(`\nProvider: ${cred.kycProvider}`);
+    console.log(`Email: ${cred.email}`);
+    console.log(`Username: ${cred.username}`);
+    console.log(`Name: ${cred.firstName} ${cred.lastName}`);
+    console.log(`Contract ID: ${cred.contractId}`);
+  });
+} else {
+  console.log('No credentials found for this party ID');
+}
+```
+
+### Resolve Credentials (Automatic Forward/Reverse Lookup)
+
+```typescript
+// The SDK automatically determines forward or reverse lookup
+// Forward lookup by email
+const result1 = await connection.resolveCredentials({
+  q: 'user@example.com'
+});
+
+// Reverse lookup by party ID
+const result2 = await connection.resolveCredentials({
+  partyId: 'party::123'
+});
+
+// This will throw an error - cannot provide both
+try {
+  await connection.resolveCredentials({
+    q: 'user@example.com',
+    partyId: 'party::123'
+  });
+} catch (error) {
+  console.error('Error:', error.message);
+  // Error: Cannot provide both q and partyId...
+}
+```
+
 ### Complete Workflow Example
 
 ```typescript

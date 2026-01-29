@@ -246,3 +246,42 @@ export interface HumanScoreResult {
         allTokenClaims: Record<string, any>[];
     };
 }
+
+/**
+ * Resolved credential (from resolve endpoint)
+ */
+export interface ResolvedCredential {
+    partyId?: string;
+    userId: number;
+    email?: string;
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+    kycProvider: CredentialProvider | 'SUMSUB';
+    contractId: string;
+    metadata?: Record<string, any>;
+}
+
+/**
+ * Resolve credentials response
+ */
+export interface ResolveCredentialsResponse {
+    credentials: ResolvedCredential[];
+}
+
+/**
+ * Resolve credentials options
+ * Either q (email/username) or partyId must be provided, but not both
+ */
+export interface ResolveCredentialsOptions {
+    /**
+     * Email or username for forward lookup
+     * Use this to find credentials when you have a user's email or username
+     */
+    q?: string;
+    /**
+     * Party ID for reverse lookup
+     * Use this to find all credentials when you have a user's party ID
+     */
+    partyId?: string;
+}

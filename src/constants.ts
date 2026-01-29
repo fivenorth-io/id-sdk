@@ -45,6 +45,7 @@ export const ENDPOINTS = {
     VERIFICATION_GENERATE_LINKS_BATCH: '/verification/generate-links-batch',
     VERIFICATION_CHECK: '/verification/check',
     HUMAN_SCORE: '/kyc/human-score',
+    RESOLVE_CREDENTIALS: '/kyc/resolve',
 } as const;
 
 /**

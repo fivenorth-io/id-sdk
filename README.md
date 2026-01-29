@@ -155,6 +155,62 @@ console.log(status.isActive); // boolean
 console.log(status.credentialData); // Original credential metadata
 ```
 
+### Resolve Credentials
+
+The resolve functionality provides two lookup methods to find credentials:
+
+#### Forward Lookup: Resolve by Email or Username
+
+Find credentials when you have a user's email or username. This returns all associated credentials and the user's party ID:
+
+```typescript
+// Resolve by email
+const result = await connection.resolve('user@example.com');
+
+// Resolve by username
+const result2 = await connection.resolve('johndoe');
+
+console.log(result.credentials); // Array of resolved credentials
+result.credentials.forEach(cred => {
+  console.log(cred.partyId); // User's party ID
+  console.log(cred.email); // Email from metadata
+  console.log(cred.kycProvider); // KYC provider (SUMSUB, GOOGLE, etc.)
+  console.log(cred.contractId); // Contract ID on the ledger
+});
+```
+
+#### Reverse Lookup: Resolve by Party ID
+
+Find all credentials when you have a user's party ID. This returns all credentials across all KYC providers for that user:
+
+```typescript
+const partyId = 'party::04a5835d6cc470817989e9acc1f20c0a::12200d35764b9b490251e499af00626b54516c4f3f1c021c2eb72bf7c72f38662cb0';
+const result = await connection.reverseResolve(partyId);
+
+console.log(result.credentials); // All credentials for this party
+result.credentials.forEach(cred => {
+  console.log(cred.email); // Email from metadata
+  console.log(cred.username); // Username from metadata
+  console.log(cred.kycProvider); // KYC provider
+});
+```
+
+#### Automatic Resolve (Forward or Reverse)
+
+The SDK can automatically determine which lookup method to use:
+
+```typescript
+// Forward lookup (automatically uses email/username)
+const result1 = await connection.resolveCredentials({
+  q: 'user@example.com'
+});
+
+// Reverse lookup (automatically uses party ID)
+const result2 = await connection.resolveCredentials({
+  partyId: 'party::123'
+});
+```
+
 ### Human Score
 
 #### Get Human Score
@@ -201,6 +257,9 @@ The connection instance returned from `idSdk.connect()`. All API operations are 
 - `generateVerificationLink(request: GenerateVerificationLinkRequest): Promise<GenerateVerificationLinkResponse>` - Generate a verification link
 - `generateVerificationLinksBatch(request: BatchGenerateVerificationLinkRequest): Promise<BatchGenerateVerificationLinkResponse>` - Generate multiple verification links
 - `checkVerificationStatus(token: string): Promise<VerificationStatusResponse>` - Check verification status (public endpoint)
+- `resolve(query: string): Promise<ResolveCredentialsResponse>` - Forward lookup: Resolve credentials by email or username
+- `reverseResolve(partyId: string): Promise<ResolveCredentialsResponse>` - Reverse lookup: Resolve credentials by party ID
+- `resolveCredentials(options: ResolveCredentialsOptions): Promise<ResolveCredentialsResponse>` - Automatically resolve using forward or reverse lookup
 - `getHumanScore(partyId: string): Promise<HumanScoreResult>` - Get human score calculation for a specific party
 
 ### Types
@@ -243,6 +302,25 @@ interface VerificationStatusResponse {
   message: string | null;
   kycProvider: string | null;
   credentialData: CredentialMetadata | null;
+}
+```
+
+#### ResolveCredentialsResponse
+```typescript
+interface ResolveCredentialsResponse {
+  credentials: ResolvedCredential[];
+}
+
+interface ResolvedCredential {
+  partyId?: string;
+  userId: number;
+  email?: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  kycProvider: 'SUMSUB' | 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
+  contractId: string;
+  metadata?: Record<string, any>;
 }
 ```
 
