@@ -35,17 +35,18 @@ export const TOKEN_ENDPOINTS = {
 } as const;
 
 /**
- * API Endpoints
+ * API Endpoints (one-to-one with backend /api/v1/institutions/me/... and /api/v1/verification/...)
  */
 export const ENDPOINTS = {
-    CREDENTIALS_ACCESS_REQUEST: '/institutions/credentials-access-request',
-    CREDENTIALS: '/institutions/credentials',
-    CREDENTIALS_BY_PARTY: '/institutions/credentials',
+    USERS: '/institutions/me/users',
+    HUMAN_SCORES: '/institutions/me/human-scores',
+    HUMAN_SCORE_BY_PARTY: '/institutions/me/human-scores',
+    CREDENTIALS: '/institutions/me/credentials',
+    CREDENTIALS_RESOLVE: '/institutions/me/credentials/resolve',
+    CREDENTIALS_REQUEST: '/institutions/me/credentials/request',
     VERIFICATION_GENERATE_LINK: '/verification/generate-link',
     VERIFICATION_GENERATE_LINKS_BATCH: '/verification/generate-links-batch',
     VERIFICATION_CHECK: '/verification/check',
-    HUMAN_SCORE: '/kyc/human-score',
-    RESOLVE_CREDENTIALS: '/kyc/resolve',
 } as const;
 
 /**

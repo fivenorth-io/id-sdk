@@ -5,6 +5,11 @@ import type {
     CredentialsListResponse,
     Credential,
     GetCredentialsOptions,
+    GetUsersOptions,
+    UsersListResponse,
+    GetHumanScoresOptions,
+    HumanScoresListResponse,
+    HumanScoreItem,
     GenerateVerificationLinkRequest,
     GenerateVerificationLinkResponse,
     BatchGenerateVerificationLinkRequest,
@@ -237,37 +242,82 @@ export class Connection {
     }
 
     /**
+     * Get users (institution users / KYC data requests) with optional pagination and filters
+     * Maps to GET /institutions/me/users
+     */
+    async getUsers(options: GetUsersOptions = {}): Promise<UsersListResponse> {
+        const params = new URLSearchParams();
+        if (options.offset !== undefined) params.append('offset', options.offset.toString());
+        if (options.limit !== undefined) params.append('limit', options.limit.toString());
+        if (options.orderBy !== undefined) params.append('orderBy', options.orderBy);
+        if (options.orderType !== undefined) params.append('orderType', options.orderType);
+        if (options.status !== undefined) params.append('status', options.status);
+        if (options.reqStatus !== undefined) params.append('reqStatus', options.reqStatus);
+        if (options.kycStatus !== undefined) params.append('kycStatus', options.kycStatus);
+        if (options.search !== undefined) params.append('search', options.search);
+        const queryString = params.toString();
+        const endpoint = `${ENDPOINTS.USERS}${queryString ? `?${queryString}` : ''}`;
+        return this.request<UsersListResponse>(endpoint, { method: HTTP.METHODS.GET });
+    }
+
+    /**
+     * Get human scores with pagination or by party IDs list
+     * Maps to GET /institutions/me/human-scores
+     */
+    async getHumanScores(
+        options: GetHumanScoresOptions = {},
+    ): Promise<HumanScoresListResponse> {
+        const params = new URLSearchParams();
+        if (options.offset !== undefined) params.append('offset', options.offset.toString());
+        if (options.limit !== undefined) params.append('limit', options.limit.toString());
+        if (options.partyIds?.length) {
+            options.partyIds.forEach((id) => params.append('partyIds', id));
+        }
+        const queryString = params.toString();
+        const endpoint = `${ENDPOINTS.HUMAN_SCORES}${queryString ? `?${queryString}` : ''}`;
+        return this.request<HumanScoresListResponse>(endpoint, { method: HTTP.METHODS.GET });
+    }
+
+    /**
+     * Get human score for a single party by partyId
+     * Maps to GET /institutions/me/human-scores/:partyId
+     */
+    async getHumanScoreByPartyId(partyId: string): Promise<HumanScoreItem> {
+        const encodedPartyId = encodeURIComponent(partyId);
+        return this.request<HumanScoreItem>(
+            `${ENDPOINTS.HUMAN_SCORE_BY_PARTY}/${encodedPartyId}`,
+            { method: HTTP.METHODS.GET },
+        );
+    }
+
+    /**
      * Create a credentials access request (proposal) for a user
-     * @param request - Request containing partyId and providers
+     * Maps to POST /institutions/me/credentials/request
      */
     async createCredentialsRequest(
         request: CreateCredentialsRequest,
     ): Promise<void> {
-        await this.request<void>(ENDPOINTS.CREDENTIALS_ACCESS_REQUEST, {
+        await this.request<void>(ENDPOINTS.CREDENTIALS_REQUEST, {
             method: HTTP.METHODS.POST,
             body: JSON.stringify(request),
         });
     }
 
     /**
-     * Get all credentials for the institution with pagination
-     * @param options - Optional pagination parameters
-     * @returns Credentials list with pagination info
+     * Get credentials with pagination and/or filter by party IDs
+     * Maps to GET /institutions/me/credentials
      */
     async getCredentials(
         options: GetCredentialsOptions = {},
     ): Promise<CredentialsListResponse> {
         const params = new URLSearchParams();
-        if (options.offset !== undefined) {
-            params.append('offset', options.offset.toString());
+        if (options.offset !== undefined) params.append('offset', options.offset.toString());
+        if (options.limit !== undefined) params.append('limit', options.limit.toString());
+        if (options.partyIds?.length) {
+            options.partyIds.forEach((id) => params.append('partyIds', id));
         }
-        if (options.limit !== undefined) {
-            params.append('limit', options.limit.toString());
-        }
-
         const queryString = params.toString();
         const endpoint = `${ENDPOINTS.CREDENTIALS}${queryString ? `?${queryString}` : ''}`;
-
         return this.request<CredentialsListResponse>(endpoint, {
             method: HTTP.METHODS.GET,
         });
@@ -275,17 +325,19 @@ export class Connection {
 
     /**
      * Get credentials for a specific party ID
-     * @param partyId - The party ID of the user
-     * @returns Array of credentials for the user
+     * Maps to GET /institutions/me/credentials/:partyId
      */
-    async getCredentialsByPartyId(partyId: string): Promise<Credential[]> {
+    async getCredentialByPartyId(partyId: string): Promise<Credential[]> {
         const encodedPartyId = encodeURIComponent(partyId);
         return this.request<Credential[]>(
-            `${ENDPOINTS.CREDENTIALS_BY_PARTY}/${encodedPartyId}`,
-            {
-                method: HTTP.METHODS.GET,
-            },
+            `${ENDPOINTS.CREDENTIALS}/${encodedPartyId}`,
+            { method: HTTP.METHODS.GET },
         );
+    }
+
+    /** @deprecated Use getCredentialByPartyId. Alias for API doc compatibility. */
+    async getCredentialsByPartyId(partyId: string): Promise<Credential[]> {
+        return this.getCredentialByPartyId(partyId);
     }
 
     /**
@@ -356,19 +408,6 @@ export class Connection {
     }
 
     /**
-     * Get human score for a specific party
-     * @param partyId - The party ID to get the human score for
-     * @returns Human score result with breakdown, badges, and detailed metrics
-     */
-    async getHumanScore(partyId: string): Promise<HumanScoreResult> {
-        const endpoint = `${ENDPOINTS.HUMAN_SCORE}/${encodeURIComponent(partyId)}`;
-
-        return this.request<HumanScoreResult>(endpoint, {
-            method: HTTP.METHODS.GET,
-        });
-    }
-
-    /**
      * Forward Lookup: Resolve credentials by email or username
      *
      * Performs a forward lookup to find KYC credentials using a user's email
@@ -408,7 +447,7 @@ export class Connection {
         }
 
         const params = new URLSearchParams({ q: query.trim() });
-        const endpoint = `${ENDPOINTS.RESOLVE_CREDENTIALS}?${params.toString()}`;
+        const endpoint = `${ENDPOINTS.CREDENTIALS_RESOLVE}?${params.toString()}`;
 
         return this.request<ResolveCredentialsResponse>(endpoint, {
             method: HTTP.METHODS.GET,
@@ -451,7 +490,7 @@ export class Connection {
         }
 
         const params = new URLSearchParams({ partyId: partyId.trim() });
-        const endpoint = `${ENDPOINTS.RESOLVE_CREDENTIALS}?${params.toString()}`;
+        const endpoint = `${ENDPOINTS.CREDENTIALS_RESOLVE}?${params.toString()}`;
 
         return this.request<ResolveCredentialsResponse>(endpoint, {
             method: HTTP.METHODS.GET,

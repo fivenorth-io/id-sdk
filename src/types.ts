@@ -171,11 +171,87 @@ export interface IDSdkConfig {
 }
 
 /**
- * Get credentials options
+ * Pagination metadata (used by list endpoints)
+ */
+export interface Pagination {
+    offset: number;
+    limit: number;
+    total: number;
+}
+
+/**
+ * Get credentials options: pagination and/or filter by party IDs
  */
 export interface GetCredentialsOptions {
     offset?: number;
     limit?: number;
+    /** When set, returns credentials for these party IDs only (institution users). */
+    partyIds?: string[];
+}
+
+/**
+ * Institution user (from getUsers)
+ */
+export interface InstitutionUser {
+    id: number;
+    fullName?: string;
+    email?: string;
+    status?: string;
+    kycStatus?: string;
+    partyId?: string;
+    proposalId: string;
+    reqStatus: string;
+    kycProvider: string;
+    regDate?: string;
+}
+
+/**
+ * Get users options (pagination and filters)
+ */
+export interface GetUsersOptions {
+    offset?: number;
+    limit?: number;
+    orderBy?: string;
+    orderType?: string;
+    status?: string;
+    reqStatus?: string;
+    kycStatus?: string;
+    search?: string;
+}
+
+/**
+ * Users list response
+ */
+export interface UsersListResponse {
+    items: InstitutionUser[];
+    pagination: Pagination;
+    totalCount?: number;
+}
+
+/**
+ * Human score item (partyId + humanScore) as returned by getHumanScores / getHumanScoreByPartyId
+ */
+export interface HumanScoreItem {
+    partyId: string;
+    humanScore: HumanScoreResult;
+}
+
+/**
+ * Get human scores options: pagination OR filter by party IDs
+ */
+export interface GetHumanScoresOptions {
+    offset?: number;
+    limit?: number;
+    /** When set, returns human scores for these party IDs only. */
+    partyIds?: string[];
+}
+
+/**
+ * Human scores list response
+ */
+export interface HumanScoresListResponse {
+    items: HumanScoreItem[];
+    pagination: Pagination;
 }
 
 /**
