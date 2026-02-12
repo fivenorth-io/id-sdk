@@ -78,7 +78,7 @@ curl -X POST https://id.devnet.cantonloop.com/oauth/token \
 2. **Use the Token**: Include the access token in subsequent API requests
 
 ```bash
-curl -X GET https://id.devnet.cantonloop.com/api/v1/credentials \
+curl -X GET "https://id.devnet.cantonloop.com/api/v1/institutions/me/credentials?offset=0&limit=10" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
@@ -91,11 +91,7 @@ curl -X GET https://id.devnet.cantonloop.com/api/v1/credentials \
 
 ### API Versioning
 
-The API uses versioning in the path. Current version is `v1`:
-
-- `/api/v1/credentials`
-- `/api/v1/credentials/:partyId`
-- etc.
+The API uses versioning in the path. Current version is `v1`. Institution endpoints are under `/api/v1/institutions/me/` (e.g. `/institutions/me/users`, `/institutions/me/credentials`, `/institutions/me/credentials/resolve`). Verification endpoints are under `/api/v1/verification/`.
 
 ## Authentication
 

@@ -1,15 +1,15 @@
 # API Reference
 
-Complete reference for the 5N ID REST API endpoints.
+Complete reference for the 5N ID REST API endpoints. All institution endpoints are under `/api/v1/institutions/me/`. Verification endpoints are under `/api/v1/verification/`.
 
 ## Base URL
 
-- **Devnet**: `https://id.devnet.cantonloop.com`
-- **Mainnet**: `https://id.mainnet.cantonloop.com`
+- **Devnet**: `https://id.devnet.cantonloop.com/api/v1`
+- **Mainnet**: `https://id.cantonloop.com/api/v1`
 
 ## Authentication
 
-All endpoints (except public endpoints) require OAuth2 authentication using the `client_credentials` flow. Include the access token in the `Authorization` header:
+All endpoints except verification check require OAuth2 using the `client_credentials` flow. Include the token in the request:
 
 ```
 Authorization: Bearer <access_token>
@@ -19,306 +19,99 @@ Authorization: Bearer <access_token>
 
 ### Obtain Access Token
 
-Request an OAuth2 access token using client credentials.
-
-**Endpoint**: `POST /oauth/token`
+**Endpoint**: `POST` (authorization server; see integration guide for token URL per environment)
 
 **Content-Type**: `application/x-www-form-urlencoded`
 
-**Parameters**:
-- `grant_type`: `client_credentials` (required)
-- `client_id`: Your client ID (required)
-- `client_secret`: Your client secret (required)
+**Body**: `grant_type=client_credentials&client_id=...&client_secret=...`
 
-**Response**:
-```json
-{
-  "access_token": "eyJhbGciOiJSUzI1NiIs...",
-  "token_type": "Bearer",
-  "expires_in": 3600
-}
-```
+**Response**: `{ "access_token": "...", "expires_in": 3600, ... }`
 
-### Create Credentials Access Request
+### GET /institutions/me/users
 
-Initiate a request to access credentials for a party.
+Returns the list of users (KYC data requests) for the authenticated institution.
 
-**Endpoint**: `POST /api/v1/credentials-access-request`
+**Query Parameters** (optional): `offset`, `limit`, `orderBy`, `orderType`, `status`, `reqStatus`, `kycStatus`, `search`
 
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
+**Response**: `{ "items": [...], "pagination": { "offset", "limit", "total" }, "totalCount"?: number }`
 
-**Request Body**:
-```json
-{
-  "partyId": "party::identifier",
-  "providers": ["provider1", "provider2"]
-}
-```
+### GET /institutions/me/human-scores
 
-**Response**:
-```json
-{
-  "requestId": "req_123456",
-  "status": "pending",
-  "partyId": "party::identifier"
-}
-```
+Returns human scores with pagination or filtered by party IDs.
 
-### Get Credentials
+**Query Parameters** (optional): `offset`, `limit`, `partyIds` (repeatable or comma-separated)
 
-Retrieve credentials associated with the authenticated institution.
+**Response**: `{ "items": [{ "partyId", "humanScore" }, ...], "pagination": { "offset", "limit", "total" } }`
 
-**Endpoint**: `GET /api/v1/credentials`
+### GET /institutions/me/human-scores/:partyId
 
-**Headers**:
-- `Authorization: Bearer <token>`
+Returns the human score for a single party.
 
-**Query Parameters**:
-- `offset`: Pagination offset (default: 0)
-- `limit`: Number of results per page (default: 20, max: 100)
+**Path**: `partyId` (required)
 
-**Response**:
-```json
-{
-  "credentials": [
-    {
-      "contractId": "contract_123",
-      "partyId": "party::identifier",
-      "status": "verified",
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "total": 100,
-  "offset": 0,
-  "limit": 20
-}
-```
+**Response**: `{ "partyId": "...", "humanScore": { "totalScore", "confidenceLevel", "breakdown", "badges", "details" } }`
 
-### Get Credentials by Party ID
+### GET /institutions/me/credentials
 
-Retrieve credentials for a specific party.
+Returns credentials with pagination and/or filter by party IDs.
 
-**Endpoint**: `GET /api/v1/credentials/:partyId`
+**Query Parameters** (optional): `offset`, `limit`, `partyIds` (repeatable or comma-separated)
 
-**Headers**:
-- `Authorization: Bearer <token>`
+**Response**: `{ "items": [Credential, ...], "pagination": { "offset", "limit", "total" } }`
 
-**Path Parameters**:
-- `partyId`: The party identifier
+### GET /institutions/me/credentials/:partyId
 
-**Response**:
-```json
-{
-  "contractId": "contract_123",
-  "partyId": "party::identifier",
-  "status": "verified",
-  "createdAt": "2024-01-01T00:00:00Z",
-  "providers": ["provider1", "provider2"]
-}
-```
+Returns credentials disclosed by the given party to the institution.
 
-### Generate Verification Link
+**Path**: `partyId` (required)
 
-Generate a verification link for a single credential.
+**Response**: Array of credential objects.
 
-**Endpoint**: `POST /api/v1/generate-link`
+### GET /institutions/me/credentials/resolve
 
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
+Resolve credentials by email/username (forward) or party ID (reverse). Provide exactly one of `q` or `partyId`.
 
-**Request Body**:
-```json
-{
-  "contractId": "contract_123"
-}
-```
+**Query Parameters**: `q` (email/username) OR `partyId` (required, one of them)
 
-**Response**:
-```json
-{
-  "token": "verify_token_abc123",
-  "link": "https://id.devnet.cantonloop.com/verify/token_abc123",
-  "expiresAt": "2024-01-02T00:00:00Z"
-}
-```
+**Response**: `{ "credentials": [ResolvedCredential, ...] }`
 
-### Generate Verification Links (Batch)
+### POST /institutions/me/credentials/request
 
-Generate multiple verification links in a single request.
+Creates a credentials access request (proposal) for a user.
 
-**Endpoint**: `POST /api/v1/generate-links-batch`
+**Body**: `{ "partyId": "party::...", "providers": ["GOOGLE", "LINKEDIN", "GITHUB", "DISCORD", "TWITTER"] }`
 
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
+**Response**: `204 No Content` on success
 
-**Request Body**:
-```json
-{
-  "requests": [
-    { "contractId": "contract_123" },
-    { "contractId": "contract_456" }
-  ]
-}
-```
+### POST /verification/generate-link
 
-**Response**:
-```json
-{
-  "links": [
-    {
-      "contractId": "contract_123",
-      "token": "verify_token_abc123",
-      "link": "https://id.devnet.cantonloop.com/verify/token_abc123",
-      "expiresAt": "2024-01-02T00:00:00Z"
-    },
-    {
-      "contractId": "contract_456",
-      "token": "verify_token_def456",
-      "link": "https://id.devnet.cantonloop.com/verify/token_def456",
-      "expiresAt": "2024-01-02T00:00:00Z"
-    }
-  ]
-}
-```
+Generate a short-lived verification link for a credential.
 
-### Check Verification Status (Public)
+**Body**: `{ "contractId": "..." }`
 
-Check the verification status of a token. This is a public endpoint that does not require authentication.
+**Response**: `{ "verificationUrl": "...", "token": "..." }`
 
-**Endpoint**: `GET /api/v1/check/:token`
+### POST /verification/generate-links-batch
 
-**Path Parameters**:
-- `token`: The verification token
+Generate verification links for multiple credentials (max 100). Body: `{ "requests": [{ "contractId": "..." }, ...] }`
 
-**Response**:
-```json
-{
-  "status": "verified",
-  "contractId": "contract_123",
-  "partyId": "party::identifier",
-  "verifiedAt": "2024-01-01T12:00:00Z"
-}
-```
+**Response**: `{ "results": [{ "contractId", "result"?: { "verificationUrl", "token" }, "error"?: { "message" } }, ...] }`
 
-### Get Human Score
+### GET /verification/check/:token
 
-Get the identity verification "human score" with detailed breakdown for a specific party.
+**Public** (no authentication). Returns verification status for a token.
 
-**Endpoint**: `GET /api/v1/kyc/human-score/:partyId`
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Parameters**:
-- `partyId` (path parameter, required): The party ID to get the human score for
-
-**Response**:
-```json
-{
-  "totalScore": 95,
-  "badges": [
-    {
-      "name": "identity_verified",
-      "status": "verified"
-    },
-    {
-      "name": "document_verified",
-      "status": "verified"
-    }
-  ],
-  "breakdown": {
-    "identity": 100,
-    "document": 90,
-    "biometric": 95
-  }
-}
-```
-
-### Resolve Credentials
-
-Resolve credentials using forward lookup (by email/username) or reverse lookup (by party ID). This endpoint supports two lookup methods:
-
-**Forward Lookup**: Search by email or username to find associated credentials and party ID. Use when you have a user's identifier.
-
-**Reverse Lookup**: Search by party ID to find all associated credentials and metadata. Use when you have a user's party ID from the ledger.
-
-**Endpoint**: `GET /api/v1/kyc/resolve`
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Query Parameters** (exactly one required):
-- `q` (string, optional): Email or username for forward lookup
-- `partyId` (string, optional): Party ID for reverse lookup
-
-**Forward Lookup Example**:
-```bash
-GET /api/v1/kyc/resolve?q=user@example.com
-```
-
-**Reverse Lookup Example**:
-```bash
-GET /api/v1/kyc/resolve?partyId=party::04a5835d6cc470817989e9acc1f20c0a::12200d35764b9b490251e499af00626b54516c4f3f1c021c2eb72bf7c72f38662cb0
-```
-
-**Response**:
-```json
-{
-  "credentials": [
-    {
-      "partyId": "party::04a5835d6cc470817989e9acc1f20c0a::12200d35764b9b490251e499af00626b54516c4f3f1c021c2eb72bf7c72f38662cb0",
-      "userId": 123,
-      "email": "user@example.com",
-      "username": "johndoe",
-      "firstName": "John",
-      "lastName": "Doe",
-      "kycProvider": "GOOGLE",
-      "contractId": "008064f25bcfa1dff5129a3e5cbf68553cf48400dda996bfd58b5c21c5bca454ecca11122025436ea2b81f3558afe832a943f9b92a864104cc8d53f3f9fc6ae4e48b119e7a",
-      "metadata": {
-        "email": "user@example.com",
-        "firstName": "John",
-        "lastName": "Doe"
-      }
-    }
-  ]
-}
-```
-
-**Error Responses**:
-- `400 Bad Request`: Either `q` or `partyId` must be provided, but not both
-- `401 Unauthorized`: Invalid or expired access token
-- `403 Forbidden`: Institution role required
+**Response**: `{ "status", "color", "isActive", "contractId", "credentialData", ... }`
 
 ## Error Responses
 
-All endpoints may return error responses in the following format:
-
-```json
-{
-  "error": "error_code",
-  "message": "Human-readable error message",
-  "details": {}
-}
-```
-
-### Common Error Codes
-
-- `401 Unauthorized`: Invalid or expired access token
-- `403 Forbidden`: Insufficient permissions
-- `404 Not Found`: Resource not found
-- `400 Bad Request`: Invalid request parameters
-- `429 Too Many Requests`: Rate limit exceeded
-- `500 Internal Server Error`: Server error
-
-## Rate Limiting
-
-API requests are subject to rate limiting. When the rate limit is exceeded, the API returns a `429 Too Many Requests` response. Include retry logic with exponential backoff in your integration.
+- `400` – Invalid parameters (e.g. both `q` and `partyId` provided to resolve)
+- `401` / `403` – Invalid or expired token
+- `404` – Resource not found (e.g. token not found for check)
+- `429` – Rate limit exceeded
+- `500` – Server error
 
 ## Next Steps
 
-- [SDK Reference](sdk-reference.md) - Use the SDK for easier integration
-- [Examples](examples.md) - See practical code examples
+- [SDK Reference](sdk-reference.md) – TypeScript/JavaScript SDK
+- [Examples](examples.md) – Code examples
