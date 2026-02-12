@@ -6,7 +6,7 @@ export type Network = 'devnet' | 'mainnet' | 'dev' | 'main';
 /**
  * Credential provider types
  */
-export type CredentialProvider = 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER';
+export type CredentialProvider = 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTER' | 'REDDIT';
 
 /**
  * KYC Status

@@ -38,7 +38,24 @@ const connection = await idSdk.connect({
 
 ## Connection Methods
 
-All methods below are called on the `Connection` returned by `idSdk.connect()`.
+All methods below are called on the `Connection` returned by `idSdk.connect()`. Verification providers (for `createCredentialsRequest` and credential `provider` fields) are: `GOOGLE`, `LINKEDIN`, `GITHUB`, `DISCORD`, `TWITTER`, `REDDIT`.
+
+**Method summary**
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getUsers(options?)` | `Promise<UsersListResponse>` | Institution users with pagination/filters |
+| `getHumanScores(options?)` | `Promise<HumanScoresListResponse>` | Human scores (pagination or by partyIds) |
+| `getHumanScoreByPartyId(partyId)` | `Promise<HumanScoreItem>` | Human score for one party |
+| `getCredentials(options?)` | `Promise<CredentialsListResponse>` | Credentials with pagination or partyIds |
+| `getCredentialByPartyId(partyId)` | `Promise<Credential[]>` | Credentials for one party |
+| `resolveCredentials(options)` | `Promise<ResolveCredentialsResponse>` | Resolve by `q` or `partyId` |
+| `createCredentialsRequest(request)` | `Promise<void>` | Create credentials access request |
+| `generateVerificationLink(request)` | `Promise<GenerateVerificationLinkResponse>` | Single verification link |
+| `generateVerificationLinksBatch(request)` | `Promise<BatchGenerateVerificationLinkResponse>` | Batch verification links |
+| `checkVerificationStatus(token)` | `Promise<VerificationStatusResponse>` | Check status (public) |
+| `resolve(query)` | `Promise<ResolveCredentialsResponse>` | Forward lookup by email/username |
+| `reverseResolve(partyId)` | `Promise<ResolveCredentialsResponse>` | Reverse lookup by party ID |
 
 ### `getUsers(options?)`
 
@@ -152,7 +169,7 @@ Creates a credentials access request (proposal) for a user. Maps to `POST /insti
 
 **Parameters**:
 - `request.partyId` (string, required): The party ID
-- `request.providers` (CredentialProvider[], required): e.g. `['GOOGLE', 'LINKEDIN', 'GITHUB']`
+- `request.providers` (CredentialProvider[], required): e.g. `['GOOGLE', 'LINKEDIN', 'GITHUB', 'DISCORD', 'TWITTER', 'REDDIT']`
 
 **Returns**: `Promise<void>` on success
 

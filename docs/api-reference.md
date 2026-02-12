@@ -79,7 +79,7 @@ Resolve credentials by email/username (forward) or party ID (reverse). Provide e
 
 Creates a credentials access request (proposal) for a user.
 
-**Body**: `{ "partyId": "party::...", "providers": ["GOOGLE", "LINKEDIN", "GITHUB", "DISCORD", "TWITTER"] }`
+**Body**: `{ "partyId": "party::...", "providers": ["GOOGLE", "LINKEDIN", "GITHUB", "DISCORD", "TWITTER", "REDDIT"] }`
 
 **Response**: `204 No Content` on success
 
