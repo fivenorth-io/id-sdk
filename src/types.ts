@@ -59,6 +59,7 @@ export interface CredentialMetadata {
  * Credential object
  */
 export interface Credential {
+    partyId: string;
     contractId: string;
     provider: CredentialProvider;
     kycStatus: KYCStatus;
@@ -327,7 +328,7 @@ export interface HumanScoreResult {
  * Resolved credential (from resolve endpoint)
  */
 export interface ResolvedCredential {
-    partyId?: string;
+    partyId: string;
     userId: number;
     email?: string;
     username?: string;

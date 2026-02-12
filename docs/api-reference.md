@@ -59,6 +59,8 @@ Returns credentials with pagination and/or filter by party IDs.
 
 **Response**: `{ "items": [Credential, ...], "pagination": { "offset", "limit", "total" } }`
 
+Each `Credential` includes: `partyId`, `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`.
+
 ### GET /institutions/me/credentials/:partyId
 
 Returns credentials disclosed by the given party to the institution.
@@ -67,6 +69,8 @@ Returns credentials disclosed by the given party to the institution.
 
 **Response**: Array of credential objects.
 
+Each credential includes: `partyId`, `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`.
+
 ### GET /institutions/me/credentials/resolve
 
 Resolve credentials by email/username (forward) or party ID (reverse). Provide exactly one of `q` or `partyId`.
@@ -74,6 +78,8 @@ Resolve credentials by email/username (forward) or party ID (reverse). Provide e
 **Query Parameters**: `q` (email/username) OR `partyId` (required, one of them)
 
 **Response**: `{ "credentials": [ResolvedCredential, ...] }`
+
+Each `ResolvedCredential` includes: `partyId`, `userId`, `email`, `username`, `firstName`, `lastName`, `kycProvider`, `contractId`, `metadata`.
 
 ### POST /institutions/me/credentials/request
 

@@ -234,12 +234,13 @@ console.log(status.status, status.isActive, status.credentialData);
 ## Type Definitions
 
 - **CredentialsListResponse**: `{ items: Credential[], pagination: { offset, limit, total } }`
-- **Credential**: `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`
+- **Credential**: `partyId`, `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`
 - **UsersListResponse**: `{ items: InstitutionUser[], pagination, totalCount? }`
 - **HumanScoresListResponse**: `{ items: HumanScoreItem[], pagination }`
 - **HumanScoreItem**: `{ partyId: string, humanScore: HumanScoreResult }`
 - **HumanScoreResult**: `totalScore`, `confidenceLevel`, `breakdown`, `badges`, `details`
 - **ResolveCredentialsResponse**: `{ credentials: ResolvedCredential[] }`
+- **ResolvedCredential**: `partyId`, `userId`, `email`, `username`, `firstName`, `lastName`, `kycProvider`, `contractId`, `metadata`
 - **GenerateVerificationLinkResponse**: `{ verificationUrl, token }`
 - **VerificationStatusResponse**: `status`, `color`, `isActive`, `contractId`, `credentialData`, etc.
 
