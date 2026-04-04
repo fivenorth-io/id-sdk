@@ -1,6 +1,6 @@
 {
 	"name": "@fivenorth/id-sdk",
-	"version": "0.1.8",
+	"version": "0.1.9",
 	"description": "TypeScript/JavaScript SDK for programmatically interacting with the 5N ID service",
 	"keywords": [
 		"5n",
@@ -43,7 +43,7 @@
 		"build": "bun build ./src/index.ts --outdir ./dist && tsc --emitDeclarationOnly",
 		"prepublishOnly": "bun run build",
 		"generate-types": "openapi-typescript ../kyc-backend/api-openapi.json -o src/generated-types.ts",
-		"test": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx test.ts",
+		"test": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx test-simple.ts",
 		"test:bun": "bun run test.ts"
 	},
 	"type": "module",

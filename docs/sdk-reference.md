@@ -42,20 +42,21 @@ All methods below are called on the `Connection` returned by `idSdk.connect()`. 
 
 **Method summary**
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `getUsers(options?)` | `Promise<UsersListResponse>` | Institution users with pagination/filters |
-| `getHumanScores(options?)` | `Promise<HumanScoresListResponse>` | Human scores (pagination or by partyIds) |
-| `getHumanScoreByPartyId(partyId)` | `Promise<HumanScoreItem>` | Human score for one party |
-| `getCredentials(options?)` | `Promise<CredentialsListResponse>` | Credentials with pagination or partyIds |
-| `getCredentialByPartyId(partyId)` | `Promise<Credential[]>` | Credentials for one party |
-| `resolveCredentials(options)` | `Promise<ResolveCredentialsResponse>` | Resolve by `q` or `partyId` |
-| `createCredentialsRequest(request)` | `Promise<void>` | Create credentials access request |
-| `generateVerificationLink(request)` | `Promise<GenerateVerificationLinkResponse>` | Single verification link |
-| `generateVerificationLinksBatch(request)` | `Promise<BatchGenerateVerificationLinkResponse>` | Batch verification links |
-| `checkVerificationStatus(token)` | `Promise<VerificationStatusResponse>` | Check status (public) |
-| `resolve(query)` | `Promise<ResolveCredentialsResponse>` | Forward lookup by email/username |
-| `reverseResolve(partyId)` | `Promise<ResolveCredentialsResponse>` | Reverse lookup by party ID |
+| Method                                    | Returns                                          | Description                               |
+| ----------------------------------------- | ------------------------------------------------ | ----------------------------------------- |
+| `getUsers(options?)`                      | `Promise<UsersListResponse>`                     | Institution users with pagination/filters |
+| `getHumanScores(options?)`                | `Promise<HumanScoresListResponse>`               | Human scores (pagination or by partyIds)  |
+| `getHumanScoreByPartyId(partyId)`         | `Promise<HumanScoreItem>`                        | Human score for one party                 |
+| `getCredentials(options?)`                | `Promise<CredentialsListResponse>`               | Credentials with pagination or partyIds   |
+| `getCredentialByPartyId(partyId)`         | `Promise<Credential[]>`                          | Credentials for one party                 |
+| `resolveCredentials(options)`             | `Promise<ResolveCredentialsResponse>`            | Resolve by `q`, `partyId`, or `a`         |
+| `createCredentialsRequest(request)`       | `Promise<void>`                                  | Create credentials access request         |
+| `generateVerificationLink(request)`       | `Promise<GenerateVerificationLinkResponse>`      | Single verification link                  |
+| `generateVerificationLinksBatch(request)` | `Promise<BatchGenerateVerificationLinkResponse>` | Batch verification links                  |
+| `checkVerificationStatus(token)`          | `Promise<VerificationStatusResponse>`            | Check status (public)                     |
+| `resolve(query)`                          | `Promise<ResolveCredentialsResponse>`            | Forward lookup by `q` (metadata or account username) |
+| `reverseResolve(partyId)`                 | `Promise<ResolveCredentialsResponse>`            | Reverse lookup by party ID                |
+| `resolveByAlias(alias)`                   | `Promise<ResolveCredentialsResponse>`            | Resolve lookup by alias/FQDN              |
 
 ### `getUsers(options?)`
 
@@ -147,11 +148,14 @@ credentials.forEach(c => console.log(c.provider, c.kycStatus));
 
 ### `resolveCredentials(options)`
 
-Resolves credentials by email/username (forward lookup) or by party ID (reverse lookup). Maps to `GET /institutions/me/credentials/resolve`. Provide exactly one of `q` or `partyId`.
+Resolves credentials by forward lookup (`q`), party ID (`partyId`, reverse), or alias/FQDN (`a`, alias lookup). Maps to `GET /institutions/me/credentials/resolve`. Provide exactly one of `q`, `partyId`, or `a`.
+
+**Forward lookup (`q`)** matches, case-insensitively: email, username, or domain stored in **credential metadata** (e.g. DNS domain), **or** the user’s **ID service account username** (`user.username` on the backend). That account username is usually the email address the user used to register, even when it does not appear the same way in provider metadata.
 
 **Parameters**:
-- `options.q` (string, optional): Email or username for forward lookup
+- `options.q` (string, optional): Value for forward lookup (metadata email/username/domain or ID service account username)
 - `options.partyId` (string, optional): Party ID for reverse lookup
+- `options.a` (string, optional): Alias/FQDN for alias lookup (e.g. `alice.5n.xyz`)
 
 **Returns**: `Promise<ResolveCredentialsResponse>` — `{ credentials: ResolvedCredential[] }`
 
@@ -159,9 +163,24 @@ Resolves credentials by email/username (forward lookup) or by party ID (reverse 
 ```typescript
 const byEmail = await connection.resolveCredentials({ q: 'user@example.com' });
 const byParty = await connection.resolveCredentials({ partyId: 'party::123' });
+const byAlias = await connection.resolveCredentials({ a: 'alice.5n.xyz' });
 ```
 
-Convenience methods: `resolve(query)` for forward lookup and `reverseResolve(partyId)` for reverse lookup.
+Convenience methods: `resolve(query)` for forward lookup, `reverseResolve(partyId)` for reverse lookup, and `resolveByAlias(alias)` for alias lookup.
+
+### `resolveByAlias(alias)`
+
+Resolves credentials by purchased alias/FQDN. Maps to `GET /institutions/me/credentials/resolve?a=...`.
+
+**Parameters**:
+- `alias` (string, required): Alias label or FQDN, e.g. `alice` or `alice.5n.xyz`
+
+**Returns**: `Promise<ResolveCredentialsResponse>` — `{ credentials: ResolvedCredential[] }`
+
+**Example**:
+```typescript
+const result = await connection.resolveByAlias('alice.5n.xyz');
+```
 
 ### `createCredentialsRequest(request)`
 

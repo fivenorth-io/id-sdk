@@ -347,13 +347,13 @@ export interface ResolveCredentialsResponse {
 }
 
 /**
- * Resolve credentials options
- * Either q (email/username) or partyId must be provided, but not both
+ * Resolve credentials options.
+ * Exactly one of `q` (forward), `partyId` (reverse), or `a` (alias/FQDN) must be provided.
  */
 export interface ResolveCredentialsOptions {
     /**
-     * Email or username for forward lookup
-     * Use this to find credentials when you have a user's email or username
+     * Forward lookup: matches credential metadata (email, username, domain—e.g. DNS)
+     * or the ID service account username (`user.username`; often the registration email).
      */
     q?: string;
     /**
@@ -361,4 +361,9 @@ export interface ResolveCredentialsOptions {
      * Use this to find all credentials when you have a user's party ID
      */
     partyId?: string;
+    /**
+     * Alias/FQDN lookup
+     * Use this to resolve credentials via purchased alias, e.g. "alice.5n.xyz"
+     */
+    a?: string;
 }

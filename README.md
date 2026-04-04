@@ -157,17 +157,17 @@ console.log(status.credentialData); // Original credential metadata
 
 ### Resolve Credentials
 
-The resolve functionality provides two lookup methods to find credentials:
+The resolve functionality provides three lookup methods to find credentials:
 
-#### Forward Lookup: Resolve by Email or Username
+#### Forward Lookup (`q`)
 
-Find credentials when you have a user's email or username. This returns all associated credentials and the user's party ID:
+Find credentials when you have an identifier that matches **credential metadata** (email, username, or domain—for example a DNS domain on a DNS credential) **or** the user’s **ID service account username** (the `user.username` field on the API; usually the email address used to register). The match is case-insensitive. This returns all associated credentials the institution can access and the user's party ID:
 
 ```typescript
-// Resolve by email
+// Resolve by email (metadata or ID service account username)
 const result = await connection.resolve('user@example.com');
 
-// Resolve by username
+// Resolve by provider username in metadata, or ID service account username
 const result2 = await connection.resolve('johndoe');
 
 console.log(result.credentials); // Array of resolved credentials
@@ -195,12 +195,21 @@ result.credentials.forEach(cred => {
 });
 ```
 
+#### Alias Lookup: Resolve by Alias/FQDN
+
+Find credentials when you have a purchased alias/FQDN:
+
+```typescript
+const result = await connection.resolveByAlias('alice.5n.xyz');
+console.log(result.credentials);
+```
+
 #### Automatic Resolve (Forward or Reverse)
 
 The SDK can automatically determine which lookup method to use:
 
 ```typescript
-// Forward lookup (automatically uses email/username)
+// Forward lookup (metadata email/username/domain or ID service account username)
 const result1 = await connection.resolveCredentials({
   q: 'user@example.com'
 });
@@ -208,6 +217,11 @@ const result1 = await connection.resolveCredentials({
 // Reverse lookup (automatically uses party ID)
 const result2 = await connection.resolveCredentials({
   partyId: 'party::123'
+});
+
+// Alias lookup (automatically uses alias/FQDN)
+const result3 = await connection.resolveCredentials({
+  a: 'alice.5n.xyz'
 });
 ```
 
@@ -257,9 +271,10 @@ The connection instance returned from `idSdk.connect()`. All API operations are 
 - `generateVerificationLink(request: GenerateVerificationLinkRequest): Promise<GenerateVerificationLinkResponse>` - Generate a verification link
 - `generateVerificationLinksBatch(request: BatchGenerateVerificationLinkRequest): Promise<BatchGenerateVerificationLinkResponse>` - Generate multiple verification links
 - `checkVerificationStatus(token: string): Promise<VerificationStatusResponse>` - Check verification status (public endpoint)
-- `resolve(query: string): Promise<ResolveCredentialsResponse>` - Forward lookup: Resolve credentials by email or username
+- `resolve(query: string): Promise<ResolveCredentialsResponse>` - Forward lookup: resolve by `q` (credential metadata email/username/domain or ID service account username)
 - `reverseResolve(partyId: string): Promise<ResolveCredentialsResponse>` - Reverse lookup: Resolve credentials by party ID
-- `resolveCredentials(options: ResolveCredentialsOptions): Promise<ResolveCredentialsResponse>` - Automatically resolve using forward or reverse lookup
+- `resolveByAlias(alias: string): Promise<ResolveCredentialsResponse>` - Alias lookup: Resolve credentials by alias/FQDN
+- `resolveCredentials(options: ResolveCredentialsOptions): Promise<ResolveCredentialsResponse>` - Automatically resolve using forward, reverse, or alias lookup
 - `getHumanScore(partyId: string): Promise<HumanScoreResult>` - Get human score calculation for a specific party
 
 ### Types

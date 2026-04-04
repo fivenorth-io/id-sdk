@@ -64,6 +64,8 @@ credentials.forEach(c => console.log(c.provider, c.kycStatus, c.metadata?.email)
 
 ### resolveCredentials
 
+Forward `q` matches metadata email/username/domain or the user’s ID service account username (often their registration email). See [SDK reference](sdk-reference.md#resolvecredentialsoptions).
+
 ```typescript
 const byEmail = await connection.resolveCredentials({ q: 'user@example.com' });
 const byParty = await connection.resolveCredentials({ partyId: 'party::123' });

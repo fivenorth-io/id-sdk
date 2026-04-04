@@ -408,15 +408,14 @@ export class Connection {
     }
 
     /**
-     * Forward Lookup: Resolve credentials by email or username
+     * Forward Lookup: Resolve credentials by `q` (forward lookup)
      *
-     * Performs a forward lookup to find KYC credentials using a user's email
-     * address or username. This is useful when you have a user's identifier
-     * (email/username) and need to find their associated credentials and party ID.
+     * Performs a forward lookup to find KYC credentials. The search is case-insensitive
+     * and matches: email, username, or domain in **credential metadata** (e.g. DNS domain),
+     * and the user’s **ID service account username** (`user.username` on the API). That
+     * account username is typically the email address used to register.
      *
-     * @param query - The email address or username to search for. The search is
-     *                case-insensitive and will match against both email and
-     *                username fields in the contract metadata.
+     * @param query - Value to match against metadata (email, username, domain) or ID service account username.
      * @returns Array of resolved credentials containing party ID, user info,
      *          and credential details
      *
@@ -429,7 +428,7 @@ export class Connection {
      *
      * @example
      * ```typescript
-     * // Find credentials by username
+     * // Find credentials by provider username in metadata or ID service account username
      * const result = await connection.resolve('johndoe');
      * ```
      *
@@ -498,20 +497,43 @@ export class Connection {
     }
 
     /**
-     * Resolve credentials using either forward or reverse lookup
+     * Alias Lookup: Resolve credentials by alias or FQDN.
      *
-     * This is a convenience method that automatically determines whether to use
-     * forward or reverse lookup based on the provided options. You can provide
-     * either `q` (email/username) for forward lookup or `partyId` for reverse
-     * lookup, but not both.
+     * Performs lookup via purchased profile alias (e.g. alice.5n.xyz).
      *
-     * @param options - Resolve options containing either `q` (email/username)
-     *                  for forward lookup or `partyId` for reverse lookup
+     * @param alias - Alias label or full FQDN.
+     * @returns Array of resolved credentials.
+     */
+    async resolveByAlias(
+        alias: string,
+    ): Promise<ResolveCredentialsResponse> {
+        if (!alias || !alias.trim()) {
+            return { credentials: [] };
+        }
+
+        const params = new URLSearchParams({ a: alias.trim() });
+        const endpoint = `${ENDPOINTS.CREDENTIALS_RESOLVE}?${params.toString()}`;
+
+        return this.request<ResolveCredentialsResponse>(endpoint, {
+            method: HTTP.METHODS.GET,
+        });
+    }
+
+    /**
+     * Resolve credentials using forward, reverse, or alias lookup
+     *
+     * This is a convenience method that automatically chooses the lookup mode from
+     * the provided options. You can provide
+     * one of `q` (metadata email/username/domain or ID service account username),
+     * `partyId` (reverse lookup), or `a` (alias/FQDN lookup).
+     *
+     * @param options - Resolve options containing one of:
+     *                  `q` (forward lookup), `partyId` (reverse lookup), or `a` (alias lookup)
      * @returns Array of resolved credentials
      *
      * @example
      * ```typescript
-     * // Forward lookup by email
+     * // Forward lookup (metadata or ID service account username)
      * const result1 = await connection.resolveCredentials({ q: 'user@example.com' });
      *
      * // Reverse lookup by party ID
@@ -520,31 +542,28 @@ export class Connection {
      * });
      * ```
      *
-     * @throws {Error} If both `q` and `partyId` are provided, or if neither is provided
+     * @throws {Error} If none are provided, or if more than one is provided
      */
     async resolveCredentials(
         options: ResolveCredentialsOptions,
     ): Promise<ResolveCredentialsResponse> {
-        const { q, partyId } = options;
+        const { q, partyId, a } = options;
 
-        // Validate that exactly one parameter is provided
-        if (!q && !partyId) {
+        const providedCount = [q, partyId, a].filter((value) => !!value).length;
+        if (providedCount !== 1) {
             throw new Error(
-                'Either q (email/username) or partyId must be provided',
-            );
-        }
-
-        if (q && partyId) {
-            throw new Error(
-                'Cannot provide both q and partyId. Provide either q (for forward lookup) or partyId (for reverse lookup)',
+                'Provide exactly one parameter: q (forward lookup), partyId (reverse lookup), or a (alias lookup)',
             );
         }
 
         if (partyId) {
             // Reverse lookup: party ID -> credentials
             return this.reverseResolve(partyId);
+        } else if (a) {
+            // Alias lookup: alias/FQDN -> credentials
+            return this.resolveByAlias(a);
         } else {
-            // Forward lookup: email/username -> credentials
+            // Forward lookup: q -> credentials (metadata or account username)
             return this.resolve(q!);
         }
     }

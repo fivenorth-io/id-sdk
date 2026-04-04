@@ -73,9 +73,11 @@ Each credential includes: `partyId`, `contractId`, `provider`, `kycStatus`, `exp
 
 ### GET /institutions/me/credentials/resolve
 
-Resolve credentials by email/username (forward) or party ID (reverse). Provide exactly one of `q` or `partyId`.
+Resolve credentials by forward lookup (`q`), party ID (reverse), or purchased alias/FQDN (alias lookup). Provide exactly one of `q`, `partyId`, or `a`.
 
-**Query Parameters**: `q` (email/username) OR `partyId` (required, one of them)
+**Forward lookup (`q`)**: email, username, or domain in **credential metadata**, or the user’s **ID service account username** (`user.username`)—case-insensitive. The account username is typically the email used at registration.
+
+**Query Parameters**: `q` (forward, as above) OR `partyId` OR `a` (alias/FQDN, e.g. `alice.5n.xyz`)
 
 **Response**: `{ "credentials": [ResolvedCredential, ...] }`
 
@@ -111,7 +113,7 @@ Generate verification links for multiple credentials (max 100). Body: `{ "reques
 
 ## Error Responses
 
-- `400` – Invalid parameters (e.g. both `q` and `partyId` provided to resolve)
+- `400` – Invalid parameters (e.g. multiple resolve params provided, or none)
 - `401` / `403` – Invalid or expired token
 - `404` – Resource not found (e.g. token not found for check)
 - `429` – Rate limit exceeded
