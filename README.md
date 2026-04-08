@@ -101,7 +101,8 @@ const userCredentials = await connection.getCredentialsByPartyId('party::123');
 userCredentials.forEach(credential => {
   console.log(credential.provider); // 'GOOGLE', 'LINKEDIN', etc.
   console.log(credential.kycStatus); // 'APPROVED', 'REJECTED', etc.
-  console.log(credential.metadata.email); // User's email
+  console.log(credential.partyId); // User's party ID
+  console.log(credential.email); // Registered account email (top-level, same as list filters)
   console.log(credential.freshness); // 'FRESH', 'MODERATE', 'STALE', 'REVOKED'
 });
 ```
@@ -173,7 +174,7 @@ const result2 = await connection.resolve('johndoe');
 console.log(result.credentials); // Array of resolved credentials
 result.credentials.forEach(cred => {
   console.log(cred.partyId); // User's party ID
-  console.log(cred.email); // Email from metadata
+  console.log(cred.email); // Registered account email (top-level)
   console.log(cred.kycProvider); // Provider (GOOGLE, LINKEDIN, etc.)
   console.log(cred.contractId); // Contract ID on the ledger
 });
@@ -189,7 +190,7 @@ const result = await connection.reverseResolve(partyId);
 
 console.log(result.credentials); // All credentials for this party
 result.credentials.forEach(cred => {
-  console.log(cred.email); // Email from metadata
+  console.log(cred.email); // Registered account email (top-level)
   console.log(cred.username); // Username from metadata
   console.log(cred.kycProvider); // Provider
 });
@@ -227,24 +228,25 @@ const result3 = await connection.resolveCredentials({
 
 ### Human Score
 
-#### Get Human Score
+#### Get human scores (institution)
 
-Get the human score calculation for a specific party. The human score evaluates account authenticity based on account age, social metrics, email consistency, and provider count:
+Use `getHumanScores` for a page of scores (optional `partyIds` / `emails` filters) or `getHumanScoreByPartyId` for one party. Each list item and the single-party response use the same object shape as **`GET /api/v1/users/me/human-scores`** (wallet) and public profile `humanScore`: top-level **`partyId`**, **`email`** (registered account, same convention as credential DTOs), and nested **`humanScore`**:
 
 ```typescript
-const humanScore = await connection.getHumanScore('party::identifier');
+const item = await connection.getHumanScoreByPartyId('party::identifier');
 
-console.log(humanScore.totalScore); // Total score (0-100)
-console.log(humanScore.confidenceLevel); // 'low', 'medium-low', 'medium', 'medium-high', 'high'
-console.log(humanScore.breakdown); // Score breakdown by category
-console.log(humanScore.badges); // Array of earned badges
-console.log(humanScore.details); // Detailed metrics and information
+console.log(item.email); // Registered account email
+console.log(item.humanScore.totalScore);
+console.log(item.humanScore.confidenceLevel); // 'low', 'medium-low', 'medium', 'medium-high', 'high'
+console.log(item.humanScore.breakdown);
+console.log(item.humanScore.badges);
+console.log(item.humanScore.details);
 ```
 
-The response includes:
+The nested `humanScore` includes:
 - **totalScore**: Overall score from 0-100
 - **confidenceLevel**: Confidence level based on the score
-- **breakdown**: Score breakdown by category (accountAgeScore, socialMetricsScore, emailConsistencyScore, providerCountScore)
+- **breakdown**: Score breakdown by category (accountAgeScore, socialMetricsScore, emailConsistencyScore, providerCountScore, …)
 - **badges**: Array of earned badges with levels (bronze, silver, gold, platinum)
 - **details**: Detailed metrics including account ages, social metrics, email consistency, provider count, and raw user info
 
@@ -275,7 +277,8 @@ The connection instance returned from `idSdk.connect()`. All API operations are 
 - `reverseResolve(partyId: string): Promise<ResolveCredentialsResponse>` - Reverse lookup: Resolve credentials by party ID
 - `resolveByAlias(alias: string): Promise<ResolveCredentialsResponse>` - Alias lookup: Resolve credentials by alias/FQDN
 - `resolveCredentials(options: ResolveCredentialsOptions): Promise<ResolveCredentialsResponse>` - Automatically resolve using forward, reverse, or alias lookup
-- `getHumanScore(partyId: string): Promise<HumanScoreResult>` - Get human score calculation for a specific party
+- `getHumanScores(options?: GetHumanScoresOptions): Promise<HumanScoresListResponse>` - Get human scores (pagination / filters)
+- `getHumanScoreByPartyId(partyId: string): Promise<HumanScoreItem>` - Get human score for one party (`partyId`, `email`, nested `humanScore`)
 
 ### Types
 
@@ -292,6 +295,8 @@ type CredentialProvider = 'GOOGLE' | 'LINKEDIN' | 'GITHUB' | 'DISCORD' | 'TWITTE
 #### Credential
 ```typescript
 interface Credential {
+  partyId: string;
+  email: string; // registered account email (same source as list `emails` filter)
   contractId: string;
   provider: CredentialProvider;
   kycStatus: KYCStatus;
@@ -327,9 +332,9 @@ interface ResolveCredentialsResponse {
 }
 
 interface ResolvedCredential {
-  partyId?: string;
+  partyId: string;
   userId: number;
-  email?: string;
+  email: string; // registered account email
   username?: string;
   firstName?: string;
   lastName?: string;
@@ -340,6 +345,8 @@ interface ResolvedCredential {
 ```
 
 #### HumanScoreResult
+Nested under `HumanScoreItem.humanScore` from `getHumanScoreByPartyId` / each element of `getHumanScores().items`:
+
 ```typescript
 interface HumanScoreResult {
   totalScore: number;
@@ -363,7 +370,18 @@ interface HumanScoreResult {
     allTokenClaims: Record<string, any>[];
   };
 }
+```
 
+#### HumanScoreItem
+```typescript
+interface HumanScoreItem {
+  partyId: string;
+  email: string; // registered account email (top-level, same as credentials)
+  humanScore: HumanScoreResult;
+}
+```
+
+```typescript
 interface HumanScoreBadge {
   id: string;
   name: string;

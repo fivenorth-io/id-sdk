@@ -91,7 +91,7 @@ curl -X GET "https://id.devnet.cantonloop.com/api/v1/institutions/me/credentials
 
 ### API Versioning
 
-The API uses versioning in the path. Current version is `v1`. Institution endpoints are under `/api/v1/institutions/me/` (e.g. `/institutions/me/users`, `/institutions/me/credentials`, `/institutions/me/credentials/resolve`). Verification endpoints are under `/api/v1/verification/`.
+The API uses versioning in the path. Current version is `v1`. Institution endpoints are under `/api/v1/institutions/me/` (e.g. `/institutions/me/users`, `/institutions/me/credentials`, `/institutions/me/human-scores`, `/institutions/me/credentials/resolve`). End-user endpoints include `/api/v1/users/me/human-scores` (same `{ partyId, email, humanScore }` shape as institution single-party human score). Verification endpoints are under `/api/v1/verification/`.
 
 ## Authentication
 

@@ -45,7 +45,7 @@ All methods below are called on the `Connection` returned by `idSdk.connect()`. 
 | Method                                    | Returns                                          | Description                               |
 | ----------------------------------------- | ------------------------------------------------ | ----------------------------------------- |
 | `getUsers(options?)`                      | `Promise<UsersListResponse>`                     | Institution users with pagination/filters |
-| `getHumanScores(options?)`                | `Promise<HumanScoresListResponse>`               | Human scores (pagination or by partyIds)  |
+| `getHumanScores(options?)`                | `Promise<HumanScoresListResponse>`               | Human scores (pagination / partyIds / emails) |
 | `getHumanScoreByPartyId(partyId)`         | `Promise<HumanScoreItem>`                        | Human score for one party                 |
 | `getCredentials(options?)`                | `Promise<CredentialsListResponse>`               | Credentials with pagination or partyIds   |
 | `getCredentialByPartyId(partyId)`         | `Promise<Credential[]>`                          | Credentials for one party                 |
@@ -78,24 +78,28 @@ console.log(result.pagination.total);
 
 ### `getHumanScores(options?)`
 
-Retrieves human scores with pagination or filtered by party IDs. Maps to `GET /institutions/me/human-scores`.
+Retrieves human scores with pagination and/or filters by party IDs and/or registered account emails. Maps to `GET /institutions/me/human-scores`.
 
 **Parameters** (optional):
-- `offset`, `limit`: Pagination (when not using partyIds)
-- `partyIds` (string[]): When set, returns human scores for these party IDs only
+- `offset`, `limit`: Pagination
+- `partyIds` (string[]): When set, narrows to these party IDs (institution users)
+- `emails` (string[]): When set, narrows by **registered account email** (`user.email`). If both `partyIds` and `emails` are set, the API matches either (OR).
 
-**Returns**: `Promise<HumanScoresListResponse>` — `{ items: { partyId, humanScore }[], pagination }`
+**Returns**: `Promise<HumanScoresListResponse>` — `{ items: { partyId, email, humanScore }[], pagination }`
 
 **Example**:
 ```typescript
 // By party IDs
 const result = await connection.getHumanScores({ partyIds: ['party::user1', 'party::user2'] });
 
+// By registration emails
+const byEmail = await connection.getHumanScores({ emails: ['user@example.com'] });
+
 // Paginated (all approved users)
 const page = await connection.getHumanScores({ offset: 0, limit: 10 });
 
 for (const item of result.items) {
-  console.log(item.partyId, item.humanScore.totalScore);
+  console.log(item.partyId, item.email, item.humanScore.totalScore);
 }
 ```
 
@@ -106,29 +110,32 @@ Retrieves the human score for a single party. Maps to `GET /institutions/me/huma
 **Parameters**:
 - `partyId` (string, required): The party ID
 
-**Returns**: `Promise<HumanScoreItem>` — `{ partyId, humanScore }`
+**Returns**: `Promise<HumanScoreItem>` — `{ partyId, email, humanScore }`
 
 **Example**:
 ```typescript
 const item = await connection.getHumanScoreByPartyId('party::user1');
-console.log(item.humanScore.totalScore, item.humanScore.badges);
+console.log(item.email, item.humanScore.totalScore, item.humanScore.badges);
 ```
 
 ### `getCredentials(options?)`
 
-Retrieves credentials with pagination and/or filter by party IDs. Maps to `GET /institutions/me/credentials`.
+Retrieves credentials with pagination and/or filter by party IDs and/or registered account emails. Maps to `GET /institutions/me/credentials`.
 
 **Parameters** (optional):
 - `offset`, `limit`: Pagination
 - `partyIds` (string[]): When set, returns credentials for these party IDs only
+- `emails` (string[]): When set, filters by **registered account email** (`user.email` on the backend) only—not credential metadata. Repeated values map to repeated `emails` query params. If both `partyIds` and `emails` are set, the API matches either (OR). Note: putting emails in query strings can expose them to proxies and access logs.
 
-**Returns**: `Promise<CredentialsListResponse>` — `{ items: Credential[], pagination }`
+**Returns**: `Promise<CredentialsListResponse>` — `{ items: Credential[], pagination }`. Each `Credential` includes top-level `partyId` and `email` (registered account email).
 
 **Example**:
 ```typescript
 const result = await connection.getCredentials({ offset: 0, limit: 20 });
 // Or by party IDs
 const byParty = await connection.getCredentials({ partyIds: ['party::user1'] });
+// Or by registered account emails
+const byEmail = await connection.getCredentials({ emails: ['user@example.com'] });
 ```
 
 ### `getCredentialByPartyId(partyId)`
@@ -138,12 +145,12 @@ Retrieves credentials for a specific party. Maps to `GET /institutions/me/creden
 **Parameters**:
 - `partyId` (string, required): The party ID
 
-**Returns**: `Promise<Credential[]>` — Array of credentials for that party
+**Returns**: `Promise<Credential[]>` — Array of credentials for that party (each with top-level `partyId`, `email`, and contract fields).
 
 **Example**:
 ```typescript
 const credentials = await connection.getCredentialByPartyId('party::user1');
-credentials.forEach(c => console.log(c.provider, c.kycStatus));
+credentials.forEach(c => console.log(c.partyId, c.email, c.provider, c.kycStatus));
 ```
 
 ### `resolveCredentials(options)`
@@ -253,13 +260,13 @@ console.log(status.status, status.isActive, status.credentialData);
 ## Type Definitions
 
 - **CredentialsListResponse**: `{ items: Credential[], pagination: { offset, limit, total } }`
-- **Credential**: `partyId`, `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`
+- **Credential**: `partyId`, `email` (registered account), `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`
 - **UsersListResponse**: `{ items: InstitutionUser[], pagination, totalCount? }`
 - **HumanScoresListResponse**: `{ items: HumanScoreItem[], pagination }`
-- **HumanScoreItem**: `{ partyId: string, humanScore: HumanScoreResult }`
+- **HumanScoreItem**: `{ partyId: string, email: string, humanScore: HumanScoreResult }`
 - **HumanScoreResult**: `totalScore`, `confidenceLevel`, `breakdown`, `badges`, `details`
 - **ResolveCredentialsResponse**: `{ credentials: ResolvedCredential[] }`
-- **ResolvedCredential**: `partyId`, `userId`, `email`, `username`, `firstName`, `lastName`, `kycProvider`, `contractId`, `metadata`
+- **ResolvedCredential**: `partyId`, `userId`, `email` (registered account), `username`, `firstName`, `lastName`, `kycProvider`, `contractId`, `metadata`
 - **GenerateVerificationLinkResponse**: `{ verificationUrl, token }`
 - **VerificationStatusResponse**: `status`, `color`, `isActive`, `contractId`, `credentialData`, etc.
 

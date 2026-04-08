@@ -261,8 +261,9 @@ export class Connection {
     }
 
     /**
-     * Get human scores with pagination or by party IDs list
+     * Get human scores with pagination and/or filters by party IDs and/or registered account emails
      * Maps to GET /institutions/me/human-scores
+     * Each item includes top-level `partyId`, `email` (registered account), and `humanScore`.
      */
     async getHumanScores(
         options: GetHumanScoresOptions = {},
@@ -273,6 +274,9 @@ export class Connection {
         if (options.partyIds?.length) {
             options.partyIds.forEach((id) => params.append('partyIds', id));
         }
+        if (options.emails?.length) {
+            options.emails.forEach((email) => params.append('emails', email));
+        }
         const queryString = params.toString();
         const endpoint = `${ENDPOINTS.HUMAN_SCORES}${queryString ? `?${queryString}` : ''}`;
         return this.request<HumanScoresListResponse>(endpoint, { method: HTTP.METHODS.GET });
@@ -281,6 +285,7 @@ export class Connection {
     /**
      * Get human score for a single party by partyId
      * Maps to GET /institutions/me/human-scores/:partyId
+     * Response: `partyId`, `email` (registered account), and nested `humanScore`.
      */
     async getHumanScoreByPartyId(partyId: string): Promise<HumanScoreItem> {
         const encodedPartyId = encodeURIComponent(partyId);
@@ -304,8 +309,11 @@ export class Connection {
     }
 
     /**
-     * Get credentials with pagination and/or filter by party IDs
-     * Maps to GET /institutions/me/credentials
+     * Get credentials with pagination and/or filters by party IDs and/or registered user emails.
+     * Maps to GET /institutions/me/credentials.
+     *
+     * `emails` matches stored account email only (`user.email`, not credential metadata). When `partyIds` and `emails`
+     * are both set, the API matches either (OR). Each item includes top-level `partyId` and `email`.
      */
     async getCredentials(
         options: GetCredentialsOptions = {},
@@ -315,6 +323,9 @@ export class Connection {
         if (options.limit !== undefined) params.append('limit', options.limit.toString());
         if (options.partyIds?.length) {
             options.partyIds.forEach((id) => params.append('partyIds', id));
+        }
+        if (options.emails?.length) {
+            options.emails.forEach((email) => params.append('emails', email));
         }
         const queryString = params.toString();
         const endpoint = `${ENDPOINTS.CREDENTIALS}${queryString ? `?${queryString}` : ''}`;

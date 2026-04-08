@@ -37,11 +37,11 @@ Returns the list of users (KYC data requests) for the authenticated institution.
 
 ### GET /institutions/me/human-scores
 
-Returns human scores with pagination or filtered by party IDs.
+Returns human scores with pagination and/or filters by party IDs and/or registered account emails (`user.email`), same OR semantics as the credentials list when both filters are set.
 
-**Query Parameters** (optional): `offset`, `limit`, `partyIds` (repeatable or comma-separated)
+**Query Parameters** (optional): `offset`, `limit`, `partyIds` (repeatable or comma-separated), `emails` (repeatable or comma-separated)
 
-**Response**: `{ "items": [{ "partyId", "humanScore" }, ...], "pagination": { "offset", "limit", "total" } }`
+**Response**: `{ "items": [{ "partyId", "email", "humanScore" }, ...], "pagination": { "offset", "limit", "total" } }` (`email` is registered account email, same as credential responses). Matches OpenAPI **`HumanScoreResultDTO`** per item.
 
 ### GET /institutions/me/human-scores/:partyId
 
@@ -49,17 +49,21 @@ Returns the human score for a single party.
 
 **Path**: `partyId` (required)
 
-**Response**: `{ "partyId": "...", "humanScore": { "totalScore", "confidenceLevel", "breakdown", "badges", "details" } }`
+**Response**: `{ "partyId": "...", "email": "...", "humanScore": { "totalScore", "confidenceLevel", "breakdown", "badges", "details" } }` — same **`HumanScoreResultDTO`** shape as one element of the batch `items` array (top-level `email` is the credential owner’s registered account `user.email`, per API schema).
+
+### GET /users/me/human-scores
+
+End-user (wallet) endpoint. Returns the same JSON object shape as a single institution human score item above: `partyId`, `email` (registered account), and nested `humanScore`. Requires a user (Bearer) access token, not client credentials.
 
 ### GET /institutions/me/credentials
 
-Returns credentials with pagination and/or filter by party IDs.
+Returns credentials with pagination and/or filter by party IDs and/or registered account emails (`emails`; OR with `partyIds` when both are set).
 
-**Query Parameters** (optional): `offset`, `limit`, `partyIds` (repeatable or comma-separated)
+**Query Parameters** (optional): `offset`, `limit`, `partyIds` (repeatable or comma-separated), `emails` (repeatable or comma-separated)
 
 **Response**: `{ "items": [Credential, ...], "pagination": { "offset", "limit", "total" } }`
 
-Each `Credential` includes: `partyId`, `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`.
+Each `Credential` includes: `partyId`, `email` (registered account email), `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`.
 
 ### GET /institutions/me/credentials/:partyId
 
@@ -69,7 +73,7 @@ Returns credentials disclosed by the given party to the institution.
 
 **Response**: Array of credential objects.
 
-Each credential includes: `partyId`, `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`.
+Each credential includes: `partyId`, `email` (registered account email), `contractId`, `provider`, `kycStatus`, `expirationDate`, `issuedAt`, `freshness`, `metadata`.
 
 ### GET /institutions/me/credentials/resolve
 
@@ -81,7 +85,7 @@ Resolve credentials by forward lookup (`q`), party ID (reverse), or purchased al
 
 **Response**: `{ "credentials": [ResolvedCredential, ...] }`
 
-Each `ResolvedCredential` includes: `partyId`, `userId`, `email`, `username`, `firstName`, `lastName`, `kycProvider`, `contractId`, `metadata`.
+Each `ResolvedCredential` includes: `partyId`, `userId`, `email` (registered account email), `username`, `firstName`, `lastName`, `kycProvider`, `contractId`, `metadata`.
 
 ### POST /institutions/me/credentials/request
 

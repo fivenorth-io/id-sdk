@@ -60,6 +60,8 @@ export interface CredentialMetadata {
  */
 export interface Credential {
     partyId: string;
+    /** Registered account email (`user.email`) for the credential owner. */
+    email: string;
     contractId: string;
     provider: CredentialProvider;
     kycStatus: KYCStatus;
@@ -181,13 +183,19 @@ export interface Pagination {
 }
 
 /**
- * Get credentials options: pagination and/or filter by party IDs
+ * Get credentials options: pagination and/or filter by party IDs and/or registered user emails.
+ * Maps to GET /institutions/me/credentials query parameters.
  */
 export interface GetCredentialsOptions {
     offset?: number;
     limit?: number;
     /** When set, returns credentials for these party IDs only (institution users). */
     partyIds?: string[];
+    /**
+     * Registered account emails (repeated query param `emails`). Matches stored account email (`user.email`) only.
+     * Combined with `partyIds` using OR when both are set. Query strings may be logged or cached by intermediaries.
+     */
+    emails?: string[];
 }
 
 /**
@@ -230,21 +238,30 @@ export interface UsersListResponse {
 }
 
 /**
- * Human score item (partyId + humanScore) as returned by getHumanScores / getHumanScoreByPartyId
+ * Canonical human score response: `partyId`, `email`, nested `humanScore`.
+ * Returned by getHumanScores / getHumanScoreByPartyId and matches GET /users/me/human-scores and public profile `humanScore`.
  */
 export interface HumanScoreItem {
     partyId: string;
+    /** Registered account email (`user.email`), same top-level convention as credential DTOs */
+    email: string;
     humanScore: HumanScoreResult;
 }
 
 /**
- * Get human scores options: pagination OR filter by party IDs
+ * Get human scores options: pagination and/or filter by party IDs and/or registered account emails.
+ * Maps to GET /institutions/me/human-scores query parameters (same semantics as getCredentials).
  */
 export interface GetHumanScoresOptions {
     offset?: number;
     limit?: number;
-    /** When set, returns human scores for these party IDs only. */
+    /** When set, returns human scores for these party IDs only (institution users). */
     partyIds?: string[];
+    /**
+     * Registered account emails (repeated query param `emails`). Matches stored account email (`user.email`) only.
+     * Combined with `partyIds` using OR when both are set.
+     */
+    emails?: string[];
 }
 
 /**
@@ -330,7 +347,8 @@ export interface HumanScoreResult {
 export interface ResolvedCredential {
     partyId: string;
     userId: number;
-    email?: string;
+    /** Registered account email (`user.email`). */
+    email: string;
     username?: string;
     firstName?: string;
     lastName?: string;

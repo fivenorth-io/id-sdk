@@ -32,7 +32,7 @@ const byParties = await connection.getHumanScores({
   partyIds: ['party::user1', 'party::user2'],
 });
 byParties.items.forEach(item => {
-  console.log(item.partyId, item.humanScore.totalScore);
+  console.log(item.partyId, item.email, item.humanScore.totalScore);
 });
 
 // Paginated
@@ -43,7 +43,7 @@ const page = await connection.getHumanScores({ offset: 0, limit: 10 });
 
 ```typescript
 const item = await connection.getHumanScoreByPartyId('party::user1');
-console.log(item.humanScore.totalScore, item.humanScore.badges);
+console.log(item.email, item.humanScore.totalScore, item.humanScore.badges);
 ```
 
 ### getCredentials
@@ -53,13 +53,17 @@ const result = await connection.getCredentials({ offset: 0, limit: 20 });
 console.log(result.items, result.pagination);
 
 const byParty = await connection.getCredentials({ partyIds: ['party::user1'] });
+
+const byRegisteredEmail = await connection.getCredentials({
+  emails: ['user@example.com'],
+});
 ```
 
 ### getCredentialByPartyId
 
 ```typescript
 const credentials = await connection.getCredentialByPartyId('party::user1');
-credentials.forEach(c => console.log(c.provider, c.kycStatus, c.metadata?.email));
+credentials.forEach(c => console.log(c.provider, c.kycStatus, c.email));
 ```
 
 ### resolveCredentials
@@ -134,6 +138,13 @@ curl -X POST "$TOKEN_URL" \
 
 ```bash
 curl -X GET "https://id.devnet.cantonloop.com/api/v1/institutions/me/credentials?offset=0&limit=20" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+### GET human scores (with optional `emails` query, same as credentials list)
+
+```bash
+curl -X GET "https://id.devnet.cantonloop.com/api/v1/institutions/me/human-scores?emails=user%40example.com&offset=0&limit=10" \
   -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
